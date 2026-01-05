@@ -14,6 +14,7 @@ function App() {
   const [studentSession, setStudentSession] = useState(null)
   const [currentClassId, setCurrentClassId] = useState(null)
   const [isStudentLoginMode, setIsStudentLoginMode] = useState(false)
+  const [currentTab, setCurrentTab] = useState('home') // 'home', 'class', 'student'
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -229,37 +230,90 @@ function App() {
             안녕, <span style={{ color: 'var(--primary-color)' }}>{profile.full_name || '친구'}</span>님!
           </h1>
 
-          <div style={{
-            padding: '28px',
-            background: 'var(--bg-primary)',
-            borderRadius: '20px',
-            marginBottom: '2.5rem',
-            border: '2px dashed var(--primary-color)',
-            textAlign: 'center'
-          }}>
-            <p style={{ fontSize: '1.1rem', lineHeight: '1.7', color: 'var(--text-secondary)', margin: 0 }}>
-              오늘도 우리 반 친구들과 함께<br />
-              <strong>반짝이는 글쓰기 시간</strong>을 만들어봐요! 📚✨
-            </p>
-          </div>
-
           {profile.role === 'TEACHER' && (
-            <div style={{ marginBottom: '24px' }}>
-              <ClassManager userId={session.user.id} onClassFound={(id) => setCurrentClassId(id)} />
-              {currentClassId && <StudentManager classId={currentClassId} />}
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', background: 'var(--bg-secondary)', padding: '4px', borderRadius: '12px' }}>
+              <button
+                onClick={() => setCurrentTab('home')}
+                style={{
+                  flex: 1, padding: '10px', borderRadius: '8px', border: 'none', cursor: 'pointer',
+                  background: currentTab === 'home' ? 'white' : 'transparent',
+                  color: currentTab === 'home' ? 'var(--primary-color)' : 'var(--text-secondary)',
+                  fontWeight: 'bold', transition: 'all 0.2s'
+                }}
+              >
+                🏠 홈
+              </button>
+              <button
+                onClick={() => setCurrentTab('class')}
+                style={{
+                  flex: 1, padding: '10px', borderRadius: '8px', border: 'none', cursor: 'pointer',
+                  background: currentTab === 'class' ? 'white' : 'transparent',
+                  color: currentTab === 'class' ? 'var(--primary-color)' : 'var(--text-secondary)',
+                  fontWeight: 'bold', transition: 'all 0.2s'
+                }}
+              >
+                🏫 클래스
+              </button>
+              <button
+                onClick={() => setCurrentTab('student')}
+                style={{
+                  flex: 1, padding: '10px', borderRadius: '8px', border: 'none', cursor: 'pointer',
+                  background: currentTab === 'student' ? 'white' : 'transparent',
+                  color: currentTab === 'student' ? 'var(--primary-color)' : 'var(--text-secondary)',
+                  fontWeight: 'bold', transition: 'all 0.2s'
+                }}
+              >
+                🎒 학생 관리
+              </button>
             </div>
           )}
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-            <Button variant="secondary" style={{ height: '100px', flexDirection: 'column', width: '100%' }}>
-              <span style={{ fontSize: '1.5rem' }}>📝</span>
-              글쓰기 주제
-            </Button>
-            <Button variant="ghost" style={{ height: '100px', flexDirection: 'column', width: '100%' }} disabled>
-              <span style={{ fontSize: '1.5rem' }}>🏆</span>
-              우리 반 랭킹
-            </Button>
-          </div>
+          {profile.role === 'TEACHER' && currentTab === 'home' && (
+            <>
+              <div style={{
+                padding: '28px',
+                background: 'var(--bg-primary)',
+                borderRadius: '20px',
+                marginBottom: '2.5rem',
+                border: '2px dashed var(--primary-color)',
+                textAlign: 'center'
+              }}>
+                <p style={{ fontSize: '1.1rem', lineHeight: '1.7', color: 'var(--text-secondary)', margin: 0 }}>
+                  오늘도 우리 반 친구들과 함께<br />
+                  <strong>반짝이는 글쓰기 시간</strong>을 만들어봐요! 📚✨
+                </p>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <Button variant="secondary" style={{ height: '100px', flexDirection: 'column', width: '100%' }}>
+                  <span style={{ fontSize: '1.5rem' }}>📝</span>
+                  글쓰기 주제
+                </Button>
+                <Button variant="ghost" style={{ height: '100px', flexDirection: 'column', width: '100%' }} disabled>
+                  <span style={{ fontSize: '1.5rem' }}>🏆</span>
+                  우리 반 랭킹
+                </Button>
+              </div>
+            </>
+          )}
+
+          {profile.role === 'TEACHER' && currentTab === 'class' && (
+            <div style={{ marginBottom: '24px' }}>
+              <ClassManager userId={session.user.id} onClassFound={(id) => setCurrentClassId(id)} />
+            </div>
+          )}
+
+          {profile.role === 'TEACHER' && currentTab === 'student' && (
+            <div style={{ marginBottom: '24px' }}>
+              {currentClassId ? (
+                <StudentManager classId={currentClassId} />
+              ) : (
+                <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
+                  <p>먼저 '클래스' 메뉴에서 학급을 만들어주세요! 🏫</p>
+                </div>
+              )}
+            </div>
+          )}
         </Card>
       )}
     </Layout>
