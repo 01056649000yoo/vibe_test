@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabaseClient';
 import Card from './common/Card';
 import Button from './common/Button';
 
-const ClassManager = ({ userId }) => {
+const ClassManager = ({ userId, onClassFound }) => {
     const [className, setClassName] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [myClass, setMyClass] = useState(null);
@@ -24,6 +24,7 @@ const ClassManager = ({ userId }) => {
 
         if (data) {
             setMyClass(data);
+            if (onClassFound) onClassFound(data.id);
         }
         setLoading(false);
     };
@@ -60,6 +61,7 @@ const ClassManager = ({ userId }) => {
             alert('학급 생성 중 오류가 생겼어요: ' + error.message);
         } else {
             setMyClass(data);
+            if (onClassFound) onClassFound(data.id);
             setIsModalOpen(false);
         }
         setIsSaving(false);

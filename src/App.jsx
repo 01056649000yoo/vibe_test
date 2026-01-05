@@ -3,21 +3,36 @@ import { supabase } from './lib/supabaseClient'
 import './App.css'
 import Layout from './components/common/Layout'
 import Card from './components/common/Card'
-import Button from './components/common/Button'
+import Button from './common/Button'
 import ClassManager from './components/ClassManager'
+import StudentManager from './components/StudentManager'
+import StudentLogin from './components/StudentLogin'
 
 function App() {
   const [session, setSession] = useState(null)
   const [profile, setProfile] = useState(null)
+  const [studentSession, setStudentSession] = useState(null)
+  const [currentClassId, setCurrentClassId] = useState(null)
+  const [isStudentLoginMode, setIsStudentLoginMode] = useState(false)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     // 앱 실행 시 현재 로그인 세션 확인
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      if (session) fetchProfile(session.user.id)
-      setLoading(false)
-    })
+    const checkSessions = async () => {
+      // 1. 구글 로그인 확인
+      const { data: { session } } = await supabase.auth.getSession();
+      setSession(session);
+      if (session) await fetchProfile(session.user.id);
+
+      // 2. 학생 코드 로그인 확인 (LocalStorage)
+      const savedStudent = localStorage.getItem('student_session');
+      if (savedStudent) {
+        setStudentSession(JSON.parse(savedStudent));
+      }
+      setLoading(false);
+    };
+
+    checkSessions();
 
     // 로그인 상태 변화를 감지 (로그인/로그아웃 시 자동 실행)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -93,11 +108,77 @@ function App() {
             style={{ width: '100%', background: '#FFFFFF', color: '#757575', border: '1px solid #ddd', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}
           >
             <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G" style={{ width: '18px', marginRight: '10px' }} />
-            Google 계정으로 로그인하기
+            선생님 구글 로그인
           </Button>
-          <p style={{ marginTop: '1.5rem', fontSize: '0.85rem', color: '#aaa' }}>
-            선생님께 받은 계정으로 로그인해주세요 🏠
+
+          <div style={{ margin: '20px 0', borderTop: '1px solid #eee', paddingTop: '20px' }}>
+            <Button
+              variant="secondary"
+              size="lg"
+              style={{ width: '100%', background: '#FBC02D' }}
+              onClick={() => setIsStudentLoginMode(true)}
+            >
+              🎒 학생 로그인 (코드 입력)
+            </Button>
+          </div>
+
+          <p style={{ marginTop: '1rem', fontSize: '0.85rem', color: '#aaa' }}>
+            나만의 글쓰기 아지트로 입장해요 🏠
           </p>
+        </Card>
+      ) : isStudentLoginMode ? (
+        <StudentLogin
+          onLoginSuccess={(data) => {
+            setStudentSession({
+              id: data.id,
+              name: data.name,
+              code: data.student_code,
+              role: 'STUDENT'
+            });
+            setIsStudentLoginMode(false);
+          }}
+          onBack={() => setIsStudentLoginMode(false)}
+        />
+      ) : studentSession ? (
+        /* [조건 4] 학생 로그인 성공 시 화면 */
+        <Card style={{ maxWidth: '600px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
+            <div style={{
+              background: '#FFF9C4',
+              color: '#FBC02D',
+              padding: '6px 16px',
+              borderRadius: '20px',
+              fontSize: '0.9rem',
+              fontWeight: 'bold'
+            }}>
+              🎒 학생 모드
+            </div>
+            <Button variant="ghost" size="sm" onClick={() => {
+              localStorage.removeItem('student_session');
+              setStudentSession(null);
+            }}>
+              로그아웃
+            </Button>
+          </div>
+          <h1 style={{ fontSize: '2.2rem', marginBottom: '1.5rem', color: 'var(--text-primary)' }}>
+            안녕, <span style={{ color: '#FBC02D' }}>{studentSession.name}</span> 어린이!
+          </h1>
+          <div style={{
+            padding: '28px',
+            background: '#FFFDE7',
+            borderRadius: '20px',
+            marginBottom: '2.5rem',
+            border: '2px dashed #FBC02D',
+            textAlign: 'center'
+          }}>
+            <p style={{ fontSize: '1.1rem', lineHeight: '1.7', color: 'var(--text-secondary)', margin: 0 }}>
+              오늘도 나만의 특별한 이야기로<br />
+              <strong>아지트를 가득 채워볼까요?</strong> 🖍️✨
+            </p>
+          </div>
+          <Button variant="primary" style={{ width: '100%', height: '80px', fontSize: '1.2rem' }}>
+            📝 내 글쓰기 시작하기
+          </Button>
         </Card>
       ) : !profile ? (
         /* [조건 2] 로그인은 됐지만 프로필이 없는 경우: 역할 선택 */
@@ -164,7 +245,8 @@ function App() {
 
           {profile.role === 'TEACHER' && (
             <div style={{ marginBottom: '24px' }}>
-              <ClassManager userId={session.user.id} />
+              <ClassManager userId={session.user.id} onClassFound={(id) => setCurrentClassId(id)} />
+              {currentClassId && <StudentManager classId={currentClassId} />}
             </div>
           )}
 
