@@ -371,7 +371,10 @@ const StudentManager = ({ classId }) => {
 
                 {/* 접속 코드 (인쇄용 - 10명씩 대형 폰트 적용) */}
                 {isCodeModalOpen && (
-                    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'white', zIndex: 2000, overflowY: 'auto' }}>
+                    <div style={{
+                        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                        background: 'white', zIndex: 2000, overflowY: 'auto'
+                    }} className="print-modal-container">
                         {/* 닫기 및 인쇄 제어바 (화면에서만 보임) */}
                         <div className="no-print" style={{
                             position: 'sticky', top: 0, background: '#F8F9F9', padding: '15px 40px',
@@ -389,87 +392,104 @@ const StudentManager = ({ classId }) => {
                         </div>
 
                         {/* 인쇄용 콘텐츠 */}
-                        <div style={{ padding: '20px 40px' }}>
+                        <div style={{ padding: '0' }} className="print-content-wrapper">
                             <style>
                                 {`
                                     @media print {
                                         .no-print { display: none !important; }
-                                        html, body { 
-                                            margin: 0; 
-                                            padding: 0; 
+                                        
+                                        /* 모달을 인쇄 시에는 전체 화면으로 확장 */
+                                        .print-modal-container {
+                                            position: absolute !important;
+                                            top: 0 !important;
+                                            left: 0 !important;
+                                            width: 100% !important;
                                             height: auto !important;
                                             overflow: visible !important;
+                                            display: block !important;
+                                            z-index: auto !important;
                                         }
-                                        .print-page { 
-                                            page-break-after: always; 
-                                            break-after: page;
-                                            min-height: 296mm; /* A4 높이에 맞춤 */
-                                            padding: 10mm;
-                                            box-sizing: border-box;
-                                            display: flex !important;
-                                            flex-direction: column !important;
+
+                                        html, body {
+                                            height: auto !important;
+                                            overflow: visible !important;
+                                            margin: 0 !important;
+                                            padding: 0 !important;
                                         }
-                                        /* 인쇄 시 스크롤바 제거 */
-                                        ::-webkit-scrollbar { display: none; }
+
+                                        .print-page {
+                                            display: block !important;
+                                            page-break-after: always !important;
+                                            break-after: page !important;
+                                            width: 210mm !important;
+                                            min-height: 296mm !important;
+                                            padding: 15mm !important;
+                                            margin: 0 auto !important;
+                                            box-sizing: border-box !important;
+                                            background: white !important;
+                                        }
+
+                                        /* 인쇄 시 여백 최적화 */
+                                        @page {
+                                            size: A4;
+                                            margin: 0;
+                                        }
+                                    }
+
+                                    /* 화면 확인용 스타일 */
+                                    .print-page {
+                                        background: white;
+                                        margin-bottom: 30px;
+                                        box-shadow: 0 0 10px rgba(0,0,0,0.1);
                                     }
                                 `}
                             </style>
 
                             {/* 10명씩 청크로 나누어 출력 */}
                             {Array.from({ length: Math.ceil(students.length / 10) }).map((_, pageIdx) => (
-                                <div key={pageIdx} className="print-page" style={{
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center', // 가로 중앙 정렬
-                                    border: '1px solid #eee',
-                                    marginBottom: '40px',
-                                    padding: '20mm 15mm' // 여백 조절
-                                }}>
+                                <div key={pageIdx} className="print-page">
                                     {/* 헤더 부분 */}
-                                    <div style={{ width: '100%', maxWidth: '170mm', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '2px solid #333', paddingBottom: '8px', marginBottom: '20px' }}>
-                                        <h3 style={{ margin: 0, fontSize: '1.4rem' }}>접속 코드 명단</h3>
-                                        <span style={{ fontSize: '1rem', color: '#666' }}>{pageIdx + 1} / {Math.ceil(students.length / 10)} Page</span>
+                                    <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '3px solid #000', paddingBottom: '10px', marginBottom: '30px' }}>
+                                        <h3 style={{ margin: 0, fontSize: '1.8rem' }}>접속 코드 명단</h3>
+                                        <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{pageIdx + 1} / {Math.ceil(students.length / 10)} Page</span>
                                     </div>
 
-                                    {/* 카드 그리드 영역 (크기 축소 및 중앙 배치) */}
+                                    {/* 카드 그리드 영역 */}
                                     <div style={{
                                         display: 'grid',
-                                        gridTemplateColumns: 'repeat(2, 80mm)', // 가로폭 고정으로 약 20% 축소 느낌
-                                        gridAutoRows: '40mm', // 세로 높이 고정으로 약 30% 축소 느낌
-                                        gap: '12px',
-                                        justifyContent: 'center',
-                                        margin: 'auto 0' // 세로 중앙 정렬
+                                        gridTemplateColumns: 'repeat(2, 1fr)',
+                                        gap: '20px'
                                     }}>
                                         {students.slice(pageIdx * 10, (pageIdx + 1) * 10).map((s, idx) => (
                                             <div key={s.id} style={{
-                                                border: '1.5px solid #000',
-                                                borderRadius: '12px',
-                                                padding: '12px',
+                                                border: '2px solid #000',
+                                                borderRadius: '15px',
+                                                padding: '20px',
                                                 display: 'flex',
                                                 flexDirection: 'column',
                                                 justifyContent: 'center',
                                                 alignItems: 'center',
                                                 background: '#fff',
-                                                boxSizing: 'border-box'
+                                                minHeight: '45mm'
                                             }}>
-                                                <div style={{ fontSize: '0.9rem', color: '#555', marginBottom: '4px', fontWeight: 'bold' }}>
+                                                <div style={{ fontSize: '1.1rem', color: '#555', marginBottom: '8px', fontWeight: 'bold' }}>
                                                     {pageIdx * 10 + idx + 1}번
                                                 </div>
-                                                <div style={{ fontWeight: '800', fontSize: '1.8rem', marginBottom: '10px', color: '#000' }}>
+                                                <div style={{ fontWeight: '900', fontSize: '2.0rem', marginBottom: '12px', color: '#000' }}>
                                                     {s.name}
                                                 </div>
                                                 <div style={{
-                                                    background: '#F2F4F4',
-                                                    width: '90%',
-                                                    padding: '8px 0',
+                                                    background: '#F8F9F9',
+                                                    width: '100%',
+                                                    padding: '12px 0',
                                                     textAlign: 'center',
-                                                    borderRadius: '8px',
-                                                    fontSize: '2.0rem',
+                                                    borderRadius: '10px',
+                                                    fontSize: '2.5rem',
                                                     fontWeight: '900',
                                                     color: '#000',
                                                     letterSpacing: '3px',
                                                     fontFamily: " 'Courier New', Courier, monospace ",
-                                                    border: '1px solid #D5DBDB'
+                                                    border: '1px solid #eee'
                                                 }}>
                                                     {s.student_code}
                                                 </div>
@@ -477,9 +497,9 @@ const StudentManager = ({ classId }) => {
                                         ))}
                                     </div>
 
-                                    {/* 하단 푸터 (인쇄 시 항상 아래쪽) */}
-                                    <div style={{ width: '100%', maxWidth: '170mm', marginTop: 'auto', textAlign: 'center', fontSize: '0.9rem', color: '#999', borderTop: '1px solid #eee', paddingTop: '10px' }}>
-                                        공유용 접속 코드 - 소중히 관리해 주세요. ✨
+                                    {/* 하단 푸터 */}
+                                    <div style={{ marginTop: '30px', textAlign: 'center', fontSize: '1.1rem', color: '#333', borderTop: '1.5px solid #eee', paddingTop: '15px' }}>
+                                        모두가 행복한 우리 반 - VIBE ✨
                                     </div>
                                 </div>
                             ))}
