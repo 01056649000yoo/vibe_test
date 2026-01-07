@@ -5,7 +5,7 @@ import Card from '../common/Card';
 import { motion, AnimatePresence } from 'framer-motion';
 
 /**
- * 역할: 선생님 - 학급 내 학생 명단 관리, 개별/일괄 포인트 관리 (더하기/빼기), 및 내역 확인
+ * 역할: 선생님 - 학급 내 학생 명단 관리, 개별/일괄 포인트 관리 (더하기/빼기), 내역 확인 및 학생 삭제
  * props:
  *  - classId: 현재 학급 ID
  */
@@ -37,6 +37,10 @@ const StudentManager = ({ classId }) => {
     const [historyStudent, setHistoryStudent] = useState(null);
     const [historyLogs, setHistoryLogs] = useState([]);
     const [loadingHistory, setLoadingHistory] = useState(false);
+
+    // 학생 삭제 확인 모달 상태
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [deleteTarget, setDeleteTarget] = useState(null);
 
     useEffect(() => {
         if (classId) fetchStudents();
@@ -100,7 +104,6 @@ const StudentManager = ({ classId }) => {
     const openBulkConfirmModal = (type) => {
         if (selectedIds.length === 0) return;
 
-        // 첫 번째 선택된 학생의 입력값을 기본값으로 사용하거나 고정값 10 사용
         const amount = 10;
         setConfirmData({
             type,
@@ -136,11 +139,8 @@ const StudentManager = ({ classId }) => {
         try {
             // 2. DB 반영: 포인트 기록(logs)과 학생 정보(total_points)를 하나로 묶어 처리해요!
             const operations = targets.map(async (t) => {
-                // 이 학생의 현재 진짜 점수에 변화량을 더해서 새 점수를 계산해요
                 const newPoints = (t.total_points || 0) + actualAmount;
 
-                // 포인트 기록을 남기고(Insert), 학생의 총점도 업데이트(Update)해요.
-                // 현실적인 트랜잭션 보장을 위해 두 작업을 Promise.all로 실행하거나 순차적으로 처리해요.
                 const { error: upError } = await supabase
                     .from('students')
                     .update({ total_points: newPoints })
@@ -159,13 +159,35 @@ const StudentManager = ({ classId }) => {
 
             await Promise.all(operations);
 
-            // 모든 작업이 성공하면 "장부 정리 완료!" 메시지를 띄워요
             alert(`${targets.length}명의 학생에게 포인트 처리가 완료되었습니다! ✨`);
             if (target === 'bulk') setSelectedIds([]);
         } catch (error) {
-            // 서버에서 문제가 생기면 바뀐 숫자를 다시 원래대로 되돌려요 (롤백)
             setStudents(previousStudents);
             alert('포인트 기록과 잔액을 맞추는 중 오류가 발생했습니다: ' + error.message);
+        }
+    };
+
+    // 학생 삭제 처리 (학생과 연결된 모든 기록을 안전하게 정리합니다)
+    const handleDeleteStudent = async () => {
+        if (!deleteTarget) return;
+
+        try {
+            const { error } = await supabase
+                .from('students')
+                .delete()
+                .eq('id', deleteTarget.id);
+
+            if (error) throw error;
+
+            // 성공하면 목록에서 즉시 제거
+            setStudents(prev => prev.filter(s => s.id !== deleteTarget.id));
+            setSelectedIds(prev => prev.filter(id => id !== deleteTarget.id));
+            alert(`${deleteTarget.name} 학생의 정보를 정리했습니다. 🧹`);
+        } catch (error) {
+            alert('학생 삭제 중 오류가 생겼어요: ' + error.message);
+        } finally {
+            setIsDeleteModalOpen(false);
+            setDeleteTarget(null);
         }
     };
 
@@ -299,6 +321,7 @@ const StudentManager = ({ classId }) => {
                             <th style={{ padding: '14px' }}>현재 포인트</th>
                             <th style={{ padding: '14px' }}>포인트 관리</th>
                             <th style={{ padding: '14px' }}>기록</th>
+                            <th style={{ padding: '14px' }}>설정</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -370,6 +393,30 @@ const StudentManager = ({ classId }) => {
                                     >
                                         📜 내역
                                     </Button>
+                                </td>
+                                <td style={{ padding: '12px' }}>
+                                    <button
+                                        onClick={() => { setDeleteTarget(s); setIsDeleteModalOpen(true); }}
+                                        style={{
+                                            border: 'none',
+                                            background: '#FFF5F5',
+                                            color: '#E03131',
+                                            padding: '6px',
+                                            borderRadius: '8px',
+                                            cursor: 'pointer',
+                                            fontSize: '1rem',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            margin: '0 auto',
+                                            transition: 'background 0.2s'
+                                        }}
+                                        title="학생 삭제"
+                                        onMouseEnter={(e) => e.target.style.background = '#FFE3E3'}
+                                        onMouseLeave={(e) => e.target.style.background = '#FFF5F5'}
+                                    >
+                                        🗑️
+                                    </button>
                                 </td>
                             </tr>
                         ))}
@@ -462,8 +509,8 @@ const StudentManager = ({ classId }) => {
                                     overflowY: 'auto',
                                     marginBottom: '20px',
                                     paddingRight: '8px',
-                                    minHeight: '200px', // 최소 높이 확보
-                                    maxHeight: '400px', // 너무 길어지면 내부 스크롤이 생기도록 제한해요!
+                                    minHeight: '200px',
+                                    maxHeight: '400px',
                                     borderRadius: '8px'
                                 }}>
                                     {loadingHistory ? (
@@ -485,20 +532,10 @@ const StudentManager = ({ classId }) => {
                                                 }}>
                                                     <div style={{ flex: 1 }}>
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                                                            <span style={{
-                                                                fontSize: '0.7rem',
-                                                                color: '#ABB2B9',
-                                                                background: '#F8F9F9',
-                                                                padding: '2px 6px',
-                                                                borderRadius: '4px'
-                                                            }}>
+                                                            <span style={{ fontSize: '0.7rem', color: '#ABB2B9', background: '#F8F9F9', padding: '2px 6px', borderRadius: '4px' }}>
                                                                 {new Date(log.created_at).toLocaleDateString()}
                                                             </span>
-                                                            <span style={{
-                                                                fontSize: '0.9rem',
-                                                                fontWeight: '600',
-                                                                color: '#495057'
-                                                            }}>
+                                                            <span style={{ fontSize: '0.9rem', fontWeight: '600', color: '#495057' }}>
                                                                 {log.reason}
                                                             </span>
                                                         </div>
@@ -521,6 +558,39 @@ const StudentManager = ({ classId }) => {
                                     )}
                                 </div>
                                 <Button variant="secondary" onClick={() => setIsHistoryModalOpen(false)}>닫기</Button>
+                            </Card>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* 3. 학생 삭제 확인 모달 */}
+            <AnimatePresence>
+                {isDeleteModalOpen && (
+                    <div style={{
+                        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                        background: 'rgba(0,0,0,0.4)', display: 'flex', justifyContent: 'center',
+                        alignItems: 'center', zIndex: 1100, backdropFilter: 'blur(4px)'
+                    }}>
+                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}>
+                            <Card style={{ width: '90%', maxWidth: '400px', padding: '32px', textAlign: 'center' }}>
+                                <div style={{ fontSize: '3rem', marginBottom: '16px' }}>⚠️</div>
+                                <h2 style={{ fontSize: '1.5rem', marginBottom: '12px', color: '#E03131' }}>학생을 삭제할까요?</h2>
+                                <p style={{ color: '#666', marginBottom: '24px', lineHeight: '1.6' }}>
+                                    <strong>{deleteTarget?.name}</strong> 학생을 삭제하면<br />
+                                    연결된 모든 포인트 기록이 영구적으로 사라집니다.<br />
+                                    정말 진행할까요?
+                                </p>
+                                <div style={{ display: 'flex', gap: '12px' }}>
+                                    <Button variant="ghost" style={{ flex: 1 }} onClick={() => setIsDeleteModalOpen(false)}>취소</Button>
+                                    <Button
+                                        variant="primary"
+                                        style={{ flex: 1, background: '#E03131' }}
+                                        onClick={handleDeleteStudent}
+                                    >
+                                        삭제하기
+                                    </Button>
+                                </div>
                             </Card>
                         </motion.div>
                     </div>
