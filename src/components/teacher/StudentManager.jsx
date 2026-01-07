@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 /**
  * 역할: 선생님 - 학급 내 학생 명단 관리, 개별/일괄 포인트 관리 (더하기/빼기), 내역 확인 및 학생 삭제
+ * 데이터가 꼬이지 않도록 삭제와 조회를 동기화합니다.✨
  * props:
  *  - classId: 현재 학급 ID
  */
@@ -190,19 +191,28 @@ const StudentManager = ({ classId }) => {
         if (!deleteTarget) return;
 
         try {
+            // DB에서 학생을 확실히 지워요!
             const { error } = await supabase
                 .from('students')
                 .delete()
                 .eq('id', deleteTarget.id);
 
-            if (error) throw error;
+            // 지우는 중에 문제가 생겼다면 알려줘요.
+            if (error) {
+                alert('학생 삭제 중 오류가 생겼어요: ' + error.message);
+                return;
+            }
 
-            // 성공하면 안내를 띄우고 명단을 다시 불러와서 DB와 100% 맞게 동기화해요!
-            alert(`${deleteTarget.name} 학생의 정보를 정리했습니다. 🧹`);
-            fetchStudents();
+            // 삭제에 성공했다면 화면(State)에서도 즉시 지우고, DB 데이터를 다시 불러와서 완벽하게 맞춥니다.
+            setStudents(prev => prev.filter(s => s.id !== deleteTarget.id));
             setSelectedIds(prev => prev.filter(id => id !== deleteTarget.id));
+
+            alert(`${deleteTarget.name} 학생의 정보를 정리했습니다. 🧹`);
+
+            // 한 번 더 데이터를 불러와서 확인 사살!
+            fetchStudents();
         } catch (error) {
-            alert('학생 삭제 중 오류가 생겼어요: ' + error.message);
+            alert('삭제 과정에서 예상치 못한 문제가 생겼어요: ' + error.message);
         } finally {
             setIsDeleteModalOpen(false);
             setDeleteTarget(null);
