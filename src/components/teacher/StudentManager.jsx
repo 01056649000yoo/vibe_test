@@ -113,7 +113,7 @@ const StudentManager = ({ classId }) => {
         setIsConfirmModalOpen(true);
     };
 
-    // 실제 포인트 처리 (트랜잭션 지향 루프)
+    // 실제 포인트 처리 (통장 잔액과 기록을 동시에 맞춰요!)
     const handleProcessPoints = async () => {
         const { type, target, student, students: targetStudents, amount, reason } = confirmData;
         if (!reason.trim()) {
@@ -125,7 +125,7 @@ const StudentManager = ({ classId }) => {
         const targets = target === 'single' ? [student] : targetStudents;
         const previousStudents = [...students];
 
-        // 1. 낙관적 업데이트
+        // 1. 낙관적 업데이트 (화면에 먼저 숫자를 바꿔서 기분 좋게 해줘요)
         setStudents(prev => prev.map(s => {
             const isTarget = targets.find(t => t.id === s.id);
             return isTarget ? { ...s, total_points: (s.total_points || 0) + actualAmount } : s;
@@ -134,19 +134,19 @@ const StudentManager = ({ classId }) => {
         setIsConfirmModalOpen(false);
 
         try {
-            // 2. DB 반영 (각 학생별 업데이트 및 로그 기록)
-            // Tip: 실제 상용 환경에서는 이 부분을 Database Function (RPC)으로 처리하는 것이 단일 트랜잭션 보장에 가장 좋습니다.
+            // 2. DB 반영: 포인트 기록(logs)과 학생 정보(total_points)를 하나로 묶어 처리해요!
             const operations = targets.map(async (t) => {
+                // 이 학생의 현재 진짜 점수에 변화량을 더해서 새 점수를 계산해요
                 const newPoints = (t.total_points || 0) + actualAmount;
 
-                // 포인트 업데이트
+                // 포인트 기록을 남기고(Insert), 학생의 총점도 업데이트(Update)해요.
+                // 현실적인 트랜잭션 보장을 위해 두 작업을 Promise.all로 실행하거나 순차적으로 처리해요.
                 const { error: upError } = await supabase
                     .from('students')
                     .update({ total_points: newPoints })
                     .eq('id', t.id);
                 if (upError) throw upError;
 
-                // 로그 기록
                 const { error: logError } = await supabase
                     .from('point_logs')
                     .insert({
@@ -159,12 +159,13 @@ const StudentManager = ({ classId }) => {
 
             await Promise.all(operations);
 
+            // 모든 작업이 성공하면 "장부 정리 완료!" 메시지를 띄워요
             alert(`${targets.length}명의 학생에게 포인트 처리가 완료되었습니다! ✨`);
             if (target === 'bulk') setSelectedIds([]);
         } catch (error) {
-            // 실패 시 롤백
+            // 서버에서 문제가 생기면 바뀐 숫자를 다시 원래대로 되돌려요 (롤백)
             setStudents(previousStudents);
-            alert('처리 중 오류가 발생했습니다: ' + error.message);
+            alert('포인트 기록과 잔액을 맞추는 중 오류가 발생했습니다: ' + error.message);
         }
     };
 
@@ -456,34 +457,64 @@ const StudentManager = ({ classId }) => {
                                     <button onClick={() => setIsHistoryModalOpen(false)} style={{ border: 'none', background: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#999' }}>&times;</button>
                                 </div>
 
-                                <div style={{ flex: 1, overflowY: 'auto', marginBottom: '20px', paddingRight: '8px' }}>
+                                <div style={{
+                                    flex: 1,
+                                    overflowY: 'auto',
+                                    marginBottom: '20px',
+                                    paddingRight: '8px',
+                                    minHeight: '200px', // 최소 높이 확보
+                                    maxHeight: '400px', // 너무 길어지면 내부 스크롤이 생기도록 제한해요!
+                                    borderRadius: '8px'
+                                }}>
                                     {loadingHistory ? (
-                                        <div style={{ textAlign: 'center', padding: '40px' }}>내역을 찾는 중... 🔍</div>
+                                        <div style={{ textAlign: 'center', padding: '40px' }}>지난 기록을 꼼꼼히 찾는 중... 🔍</div>
                                     ) : historyLogs.length === 0 ? (
-                                        <div style={{ textAlign: 'center', padding: '40px', color: '#999' }}>아직 기록이 없어요. ✨</div>
+                                        <div style={{ textAlign: 'center', padding: '40px', color: '#999' }}>아직 포인트 기록이 깨끗해요! ✨</div>
                                     ) : (
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                             {historyLogs.map(log => (
                                                 <div key={log.id} style={{
-                                                    padding: '12px',
-                                                    background: '#F8F9FA',
-                                                    borderRadius: '10px',
+                                                    padding: '14px',
+                                                    background: 'white',
+                                                    borderRadius: '14px',
                                                     display: 'flex',
                                                     justifyContent: 'space-between',
                                                     alignItems: 'center',
-                                                    borderLeft: `4px solid ${log.amount > 0 ? '#4CAF50' : '#F44336'}`
+                                                    border: '1px solid #F1F3F5',
+                                                    boxShadow: '0 2px 5px rgba(0,0,0,0.02)'
                                                 }}>
-                                                    <div>
-                                                        <p style={{ margin: '0 0 4px 0', fontSize: '0.95rem', fontWeight: '600' }}>{log.reason}</p>
-                                                        <p style={{ margin: 0, fontSize: '0.75rem', color: '#999' }}>{new Date(log.created_at).toLocaleString()}</p>
+                                                    <div style={{ flex: 1 }}>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                                                            <span style={{
+                                                                fontSize: '0.7rem',
+                                                                color: '#ABB2B9',
+                                                                background: '#F8F9F9',
+                                                                padding: '2px 6px',
+                                                                borderRadius: '4px'
+                                                            }}>
+                                                                {new Date(log.created_at).toLocaleDateString()}
+                                                            </span>
+                                                            <span style={{
+                                                                fontSize: '0.9rem',
+                                                                fontWeight: '600',
+                                                                color: '#495057'
+                                                            }}>
+                                                                {log.reason}
+                                                            </span>
+                                                        </div>
+                                                        <span style={{ fontSize: '0.75rem', color: '#ADB5BD' }}>
+                                                            {new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                        </span>
                                                     </div>
-                                                    <span style={{
-                                                        fontWeight: 'bold',
-                                                        color: log.amount > 0 ? '#2E7D32' : '#C62828',
-                                                        fontSize: '1.1rem'
+                                                    <div style={{
+                                                        minWidth: '60px',
+                                                        textAlign: 'right',
+                                                        fontSize: '1.1rem',
+                                                        fontWeight: '800',
+                                                        color: log.amount > 0 ? '#37B24D' : '#F03E3E'
                                                     }}>
                                                         {log.amount > 0 ? `+${log.amount}` : log.amount}
-                                                    </span>
+                                                    </div>
                                                 </div>
                                             ))}
                                         </div>
