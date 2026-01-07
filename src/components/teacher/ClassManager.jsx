@@ -1,8 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabaseClient';
-import Card from './common/Card';
-import Button from './common/Button';
+import { supabase } from '../../lib/supabaseClient';
+import Card from '../common/Card';
+import Button from '../common/Button';
 
+/**
+ * 역할: 선생님 - 학급 생성 및 초대 코드 관리
+ * props:
+ *  - userId: 선생님 사용자 ID
+ *  - onClassFound: 학급 정보(ID)를 부모 컴포넌트에 전달하는 함수
+ */
 const ClassManager = ({ userId, onClassFound }) => {
     const [className, setClassName] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);

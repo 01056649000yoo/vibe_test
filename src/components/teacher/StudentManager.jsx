@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabaseClient';
-import Button from './common/Button';
+import { supabase } from '../../lib/supabaseClient';
+import Button from '../common/Button';
 
+/**
+ * 역할: 선생님 - 학급 내 학생 명단 관리 및 개별 코드 발급
+ * props:
+ *  - classId: 현재 학급 ID
+ */
 const StudentManager = ({ classId }) => {
     const [studentName, setStudentName] = useState('');
     const [students, setStudents] = useState([]);

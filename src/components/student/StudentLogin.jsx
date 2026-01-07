@@ -1,8 +1,14 @@
 import React, { useState } from 'react';
-import { supabase } from '../lib/supabaseClient';
-import Card from './common/Card';
-import Button from './common/Button';
+import { supabase } from '../../lib/supabaseClient';
+import Card from '../common/Card';
+import Button from '../common/Button';
 
+/**
+ * 역할: 학생 로그인 (8자리 코드 입력)
+ * props:
+ *  - onLoginSuccess: 로그인 성공 시 실행되는 콜백 (학생 데이터 전달)
+ *  - onBack: 랜딩 페이지로 돌아가는 함수
+ */
 const StudentLogin = ({ onLoginSuccess, onBack }) => {
     const [code, setCode] = useState('');
     const [loading, setLoading] = useState(false);
@@ -28,7 +34,7 @@ const StudentLogin = ({ onLoginSuccess, onBack }) => {
                 id: data.id,
                 name: data.name,
                 code: data.student_code,
-                className: data.classes.name,
+                className: data.classes?.name,
                 role: 'STUDENT'
             }));
             onLoginSuccess(data);
