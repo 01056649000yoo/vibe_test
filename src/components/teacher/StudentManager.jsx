@@ -130,36 +130,87 @@ const StudentManager = ({ classId }) => {
 
     return (
         <div style={{ marginTop: '4px', textAlign: 'left' }}>
-            {/* [상단 컨트롤 바 - 2줄 구성] */}
+            {/* [상단 컨트롤 바 - 중앙 정렬 및 정돈된 2줄 구성] */}
             <div style={{
                 position: 'sticky',
                 top: 0,
                 zIndex: 100,
                 background: '#FDFEFE',
-                padding: '12px 16px',
-                borderRadius: '12px',
-                marginBottom: '16px',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
-                border: '1px solid #E5E8E8'
+                padding: '16px',
+                borderRadius: '16px',
+                marginBottom: '20px',
+                boxShadow: '0 8px 16px rgba(0,0,0,0.06)',
+                border: '1px solid #E5E8E8',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center', // 전체 중앙 정렬
+                gap: '16px'
             }}>
-                {/* 1행: 학생 추가 영역 */}
-                <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+                {/* 1행: 학생 추가 영역 (중앙 정렬) */}
+                <div style={{
+                    display: 'flex',
+                    gap: '10px',
+                    width: '100%',
+                    maxWidth: '600px', // 너무 퍼지지 않게 너비 제한
+                    justifyContent: 'center'
+                }}>
                     <input
                         type="text"
                         placeholder="새로운 친구의 이름을 입력하세요 🎒"
                         value={studentName}
                         onChange={(e) => setStudentName(e.target.value)}
                         onKeyPress={(e) => e.key === 'Enter' && handleAddStudent()}
-                        style={{ flex: 1, padding: '10px 14px', borderRadius: '10px', border: '1px solid #D5DBDB', outline: 'none', fontSize: '1rem' }}
+                        style={{
+                            flex: 1,
+                            padding: '12px 18px',
+                            borderRadius: '12px',
+                            border: '1px solid #D5DBDB',
+                            outline: 'none',
+                            fontSize: '1rem',
+                            boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'
+                        }}
                     />
-                    <Button onClick={handleAddStudent} disabled={isAdding} style={{ padding: '0 20px', fontWeight: 'bold' }}>명단에 추가 ✨</Button>
+                    <Button
+                        onClick={handleAddStudent}
+                        disabled={isAdding}
+                        style={{
+                            padding: '0 24px',
+                            fontWeight: 'bold',
+                            borderRadius: '12px',
+                            minWidth: '120px'
+                        }}
+                    >
+                        명단에 추가 ✨
+                    </Button>
                 </div>
 
-                {/* 2행: 포인트 및 코드 관리 영역 */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: '#566573', cursor: 'pointer', background: '#F8F9F9', padding: '6px 10px', borderRadius: '8px', border: '1px solid #D5DBDB', fontWeight: 'bold', whiteSpace: 'nowrap' }}>
-                            <input type="checkbox" checked={students.length > 0 && selectedIds.length === students.length} onChange={toggleSelectAll} style={{ width: '15px', height: '15px' }} />
+                {/* 2행: 포인트 및 코드 관리 영역 (중앙 정렬) */}
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    gap: '12px',
+                    width: '100%',
+                    maxWidth: '600px',
+                    flexWrap: 'wrap'
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <label style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            fontSize: '0.85rem',
+                            color: '#566573',
+                            cursor: 'pointer',
+                            background: '#F8F9F9',
+                            padding: '8px 14px',
+                            borderRadius: '10px',
+                            border: '1px solid #D5DBDB',
+                            fontWeight: 'bold',
+                            whiteSpace: 'nowrap',
+                            transition: 'all 0.2s'
+                        }}>
+                            <input type="checkbox" checked={students.length > 0 && selectedIds.length === students.length} onChange={toggleSelectAll} style={{ width: '16px', height: '16px' }} />
                             전체
                         </label>
                         <Button
@@ -167,31 +218,36 @@ const StudentManager = ({ classId }) => {
                             size="sm"
                             disabled={selectedIds.length === 0}
                             style={{
-                                background: selectedIds.length > 0 ? '#3498DB' : '#D5DBDB',
-                                color: 'white',
-                                height: '36px',
-                                padding: '0 12px',
+                                background: selectedIds.length > 0 ? '#3498DB' : '#EBEDEF',
+                                color: selectedIds.length > 0 ? 'white' : '#ABB2B9',
+                                height: '40px',
+                                padding: '0 18px',
                                 fontWeight: 'bold',
                                 whiteSpace: 'nowrap',
-                                flexShrink: 0
+                                borderRadius: '10px',
+                                border: 'none',
+                                boxShadow: selectedIds.length > 0 ? '0 4px 6px rgba(52,152,219,0.2)' : 'none'
                             }}
                         >
                             ⚡ 점수 주기 {selectedIds.length > 0 && `(${selectedIds.length})`}
                         </Button>
                     </div>
 
+                    <div style={{ width: '2px', height: '20px', background: '#E5E8E8' }} /> {/* 구분선 */}
+
                     <Button
                         onClick={() => setIsCodeModalOpen(true)}
                         variant="ghost"
                         size="sm"
                         style={{
-                            background: '#FFF9C4',
+                            background: '#FFFDE7',
                             border: '1px solid #FFE082',
                             color: '#7E5109',
                             fontWeight: 'bold',
-                            height: '36px',
+                            height: '40px',
+                            padding: '0 18px',
                             whiteSpace: 'nowrap',
-                            flexShrink: 0
+                            borderRadius: '10px'
                         }}
                     >
                         🔑 접속코드 확인 / 인쇄
