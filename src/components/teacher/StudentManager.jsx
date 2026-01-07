@@ -411,50 +411,56 @@ const StudentManager = ({ classId }) => {
                                 <div key={pageIdx} className="print-page" style={{
                                     display: 'flex',
                                     flexDirection: 'column',
-                                    border: '1px solid #eee', // 화면 확인용
-                                    marginBottom: '20px'
+                                    alignItems: 'center', // 가로 중앙 정렬
+                                    border: '1px solid #eee',
+                                    marginBottom: '40px',
+                                    padding: '20mm 15mm' // 여백 조절
                                 }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '3px solid #000', paddingBottom: '10px', marginBottom: '30px' }}>
-                                        <h3 style={{ margin: 0, fontSize: '1.8rem' }}>접속 코드 명단</h3>
-                                        <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{pageIdx + 1} / {Math.ceil(students.length / 10)} Page</span>
+                                    {/* 헤더 부분 */}
+                                    <div style={{ width: '100%', maxWidth: '170mm', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '2px solid #333', paddingBottom: '8px', marginBottom: '20px' }}>
+                                        <h3 style={{ margin: 0, fontSize: '1.4rem' }}>접속 코드 명단</h3>
+                                        <span style={{ fontSize: '1rem', color: '#666' }}>{pageIdx + 1} / {Math.ceil(students.length / 10)} Page</span>
                                     </div>
 
+                                    {/* 카드 그리드 영역 (크기 축소 및 중앙 배치) */}
                                     <div style={{
                                         display: 'grid',
-                                        gridTemplateColumns: 'repeat(2, 1fr)', // 2열 구성 (가로가 넓어짐)
-                                        gridTemplateRows: 'repeat(5, 1fr)',    // 5행 구성 (세로가 길어짐)
-                                        gap: '20px',
-                                        flex: 1
+                                        gridTemplateColumns: 'repeat(2, 80mm)', // 가로폭 고정으로 약 20% 축소 느낌
+                                        gridAutoRows: '40mm', // 세로 높이 고정으로 약 30% 축소 느낌
+                                        gap: '12px',
+                                        justifyContent: 'center',
+                                        margin: 'auto 0' // 세로 중앙 정렬
                                     }}>
                                         {students.slice(pageIdx * 10, (pageIdx + 1) * 10).map((s, idx) => (
                                             <div key={s.id} style={{
-                                                border: '2px solid #000',
-                                                borderRadius: '15px',
-                                                padding: '20px',
+                                                border: '1.5px solid #000',
+                                                borderRadius: '12px',
+                                                padding: '12px',
                                                 display: 'flex',
                                                 flexDirection: 'column',
                                                 justifyContent: 'center',
                                                 alignItems: 'center',
-                                                background: '#fff'
+                                                background: '#fff',
+                                                boxSizing: 'border-box'
                                             }}>
-                                                <div style={{ fontSize: '1.2rem', color: '#444', marginBottom: '10px', fontWeight: 'bold' }}>
+                                                <div style={{ fontSize: '0.9rem', color: '#555', marginBottom: '4px', fontWeight: 'bold' }}>
                                                     {pageIdx * 10 + idx + 1}번
                                                 </div>
-                                                <div style={{ fontWeight: '900', fontSize: '2.2rem', marginBottom: '15px', color: '#000' }}>
+                                                <div style={{ fontWeight: '800', fontSize: '1.8rem', marginBottom: '10px', color: '#000' }}>
                                                     {s.name}
                                                 </div>
                                                 <div style={{
-                                                    background: '#F8F9F9',
-                                                    width: '100%',
-                                                    padding: '15px 0',
+                                                    background: '#F2F4F4',
+                                                    width: '90%',
+                                                    padding: '8px 0',
                                                     textAlign: 'center',
-                                                    borderRadius: '10px',
-                                                    fontSize: '2.8rem',
+                                                    borderRadius: '8px',
+                                                    fontSize: '2.0rem',
                                                     fontWeight: '900',
                                                     color: '#000',
-                                                    letterSpacing: '4px',
+                                                    letterSpacing: '3px',
                                                     fontFamily: " 'Courier New', Courier, monospace ",
-                                                    border: '1px solid #eee'
+                                                    border: '1px solid #D5DBDB'
                                                 }}>
                                                     {s.student_code}
                                                 </div>
@@ -462,8 +468,9 @@ const StudentManager = ({ classId }) => {
                                         ))}
                                     </div>
 
-                                    <div style={{ marginTop: '20px', textAlign: 'center', fontSize: '1rem', color: '#666', borderTop: '1px solid #eee', paddingTop: '10px' }}>
-                                        우리 반 아이들의 소중한 정보를 소중히 다뤄주세요. ✨
+                                    {/* 하단 푸터 (인쇄 시 항상 아래쪽) */}
+                                    <div style={{ width: '100%', maxWidth: '170mm', marginTop: 'auto', textAlign: 'center', fontSize: '0.9rem', color: '#999', borderTop: '1px solid #eee', paddingTop: '10px' }}>
+                                        공유용 접속 코드 - 소중히 관리해 주세요. ✨
                                     </div>
                                 </div>
                             ))}

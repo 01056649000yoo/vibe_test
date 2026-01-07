@@ -37,10 +37,27 @@ body {
   margin: 0;
   padding: 0;
   background-color: var(--bg-primary);
+  /* 배경 이미지 사용 시 중앙 정렬 및 최적화 */
+  background-position: center center !important;
+  background-size: cover;
+  background-repeat: no-repeat;
+  /* 모바일 호환성: fixed 대신 기본값(scroll) 사용 혹은 상위 설정 유지 */
+  background-attachment: scroll;
+
   color: var(--text-primary);
   font-family: 'Noto Sans KR', 'Pretendard', system-ui, sans-serif;
+
+  /* 모바일 브라우저 주소창 대응 */
   min-height: 100vh;
+  min-height: 100dvh;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+
   word-break: keep-all;
+  overflow-x: hidden;
 }
 
 .container {
