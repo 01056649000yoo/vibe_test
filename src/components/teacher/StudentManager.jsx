@@ -394,14 +394,23 @@ const StudentManager = ({ classId }) => {
                                 {`
                                     @media print {
                                         .no-print { display: none !important; }
+                                        html, body { 
+                                            margin: 0; 
+                                            padding: 0; 
+                                            height: auto !important;
+                                            overflow: visible !important;
+                                        }
                                         .print-page { 
                                             page-break-after: always; 
                                             break-after: page;
-                                            height: 297mm; /* A4 정사이즈 */
+                                            min-height: 296mm; /* A4 높이에 맞춤 */
                                             padding: 10mm;
                                             box-sizing: border-box;
+                                            display: flex !important;
+                                            flex-direction: column !important;
                                         }
-                                        body { margin: 0; padding: 0; }
+                                        /* 인쇄 시 스크롤바 제거 */
+                                        ::-webkit-scrollbar { display: none; }
                                     }
                                 `}
                             </style>
