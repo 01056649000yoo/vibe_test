@@ -46,21 +46,27 @@ const StudentManager = ({ classId }) => {
         if (classId) fetchStudents();
     }, [classId]);
 
+    // 명단이 겹치지 않게 깨끗이 정리하며 데이터를 불러와요!
     const fetchStudents = async () => {
-        const { data } = await supabase
+        if (!classId) return;
+
+        const { data, error } = await supabase
             .from('students')
             .select('*')
             .eq('class_id', classId)
             .order('created_at', { ascending: true });
 
-        setStudents(data || []);
+        if (!error && data) {
+            // 기존 명단에 덧붙이지 않고, 새로운 명단으로 완전히 교체해요.
+            setStudents(data);
 
-        // 입력값 초기화
-        const initialInputs = {};
-        (data || []).forEach(s => {
-            initialInputs[s.id] = 10; // 기본값 10
-        });
-        setPointInputs(initialInputs);
+            // 포인트 입력값들도 새 명단에 맞춰서 다시 준비해요.
+            const initialInputs = {};
+            data.forEach(s => {
+                initialInputs[s.id] = 10;
+            });
+            setPointInputs(initialInputs);
+        }
     };
 
     // 체크박스 처리
@@ -227,22 +233,32 @@ const StudentManager = ({ classId }) => {
         }
         setIsAdding(true);
         const code = generateCode();
-        const { error } = await supabase
-            .from('students')
-            .insert({
-                class_id: classId,
-                name: studentName,
-                student_code: code,
-                total_points: 0
-            });
 
-        if (error) {
+        try {
+            const { data, error } = await supabase
+                .from('students')
+                .insert({
+                    class_id: classId,
+                    name: studentName,
+                    student_code: code,
+                    total_points: 0
+                })
+                .select(); // 새로 추가된 학생 정보를 바로 받아와요
+
+            if (error) throw error;
+
+            if (data && data[0]) {
+                const newStudent = data[0];
+                // 서버 전체를 다시 부르지 않고, 우리 목록에 새 친구만 살짝 추가해요!
+                setStudents(prev => [...prev, newStudent]);
+                setPointInputs(prev => ({ ...prev, [newStudent.id]: 10 }));
+                setStudentName('');
+            }
+        } catch (error) {
             alert('학생 등록 중 문제가 생겼어요: ' + error.message);
-        } else {
-            setStudentName('');
-            fetchStudents();
+        } finally {
+            setIsAdding(false);
         }
-        setIsAdding(false);
     };
 
     return (
