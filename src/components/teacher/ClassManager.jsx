@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import Card from '../common/Card';
 import Button from '../common/Button';
+import StudentManager from './StudentManager';
 
 /**
- * 역할: 선생님 - 학급 생성 및 초대 코드 관리
+ * 역할: 선생님 - 학급 생성, 초대 코드 관리 및 학생 명단 통합 관리
  * props:
  *  - userId: 선생님 사용자 ID
  *  - onClassFound: 학급 정보(ID)를 부모 컴포넌트에 전달하는 함수
@@ -80,54 +81,64 @@ const ClassManager = ({ userId, onClassFound }) => {
         }
     };
 
-    if (loading) return <div>학급 정보를 불러오는 중...</div>;
+    if (loading) return <div style={{ textAlign: 'center', padding: '20px' }}>학급 정보를 불러오는 중...</div>;
 
     return (
         <div style={{ marginTop: '24px' }}>
             {!myClass ? (
-                <Button
-                    variant="primary"
-                    size="lg"
-                    style={{ width: '100%', height: '80px', fontSize: '1.2rem', gap: '10px' }}
-                    onClick={() => setIsModalOpen(true)}
-                >
-                    <span>🏫</span> 우리 클래스 만들기
-                </Button>
+                <div style={{ textAlign: 'center', padding: '40px' }}>
+                    <p style={{ color: 'var(--text-secondary)', marginBottom: '24px' }}>아직 등록된 학급이 없어요. 🏫</p>
+                    <Button
+                        variant="primary"
+                        size="lg"
+                        style={{ width: '100%', height: '80px', fontSize: '1.2rem', gap: '10px' }}
+                        onClick={() => setIsModalOpen(true)}
+                    >
+                        <span>🏫</span> 우리 클래스 만들기
+                    </Button>
+                </div>
             ) : (
-                <div style={{
-                    padding: '24px',
-                    background: 'var(--bg-secondary)',
-                    borderRadius: '16px',
-                    border: '1px solid var(--primary-color)',
-                    textAlign: 'left'
-                }}>
-                    <div style={{ marginBottom: '16px' }}>
-                        <span style={{ fontSize: '0.9rem', color: 'var(--primary-color)', fontWeight: 'bold' }}>내 학급</span>
-                        <h3 style={{ margin: '4px 0 0 0', fontSize: '1.5rem', color: 'var(--text-primary)' }}>
-                            {myClass.name}
-                        </h3>
+                <>
+                    {/* 학급 정보 카드 */}
+                    <div style={{
+                        padding: '24px',
+                        background: 'var(--bg-secondary)',
+                        borderRadius: '16px',
+                        border: '1px solid var(--primary-color)',
+                        textAlign: 'left',
+                        marginBottom: '32px'
+                    }}>
+                        <div style={{ marginBottom: '16px' }}>
+                            <span style={{ fontSize: '0.9rem', color: 'var(--primary-color)', fontWeight: 'bold' }}>내 학급</span>
+                            <h3 style={{ margin: '4px 0 0 0', fontSize: '1.5rem', color: 'var(--text-primary)' }}>
+                                {myClass.name}
+                            </h3>
+                        </div>
+
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            background: 'white',
+                            padding: '16px',
+                            borderRadius: '12px',
+                            boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.05)'
+                        }}>
+                            <div>
+                                <p style={{ margin: 0, fontSize: '0.8rem', color: '#888' }}>초대 코드</p>
+                                <p style={{ margin: 0, fontSize: '1.3rem', fontWeight: '800', letterSpacing: '2px', color: 'var(--text-primary)' }}>
+                                    {myClass.invite_code}
+                                </p>
+                            </div>
+                            <Button variant="secondary" size="sm" onClick={copyCode}>
+                                복사하기 📋
+                            </Button>
+                        </div>
                     </div>
 
-                    <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        background: 'white',
-                        padding: '16px',
-                        borderRadius: '12px',
-                        boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.05)'
-                    }}>
-                        <div>
-                            <p style={{ margin: 0, fontSize: '0.8rem', color: '#888' }}>초대 코드</p>
-                            <p style={{ margin: 0, fontSize: '1.3rem', fontWeight: '800', letterSpacing: '2px', color: 'var(--text-primary)' }}>
-                                {myClass.invite_code}
-                            </p>
-                        </div>
-                        <Button variant="secondary" size="sm" onClick={copyCode}>
-                            복사하기 📋
-                        </Button>
-                    </div>
-                </div>
+                    {/* 학생 관리 섹션 통합 */}
+                    <StudentManager classId={myClass.id} />
+                </>
             )}
 
             {/* 학급 생성 모달 */}

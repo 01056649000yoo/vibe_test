@@ -45,7 +45,7 @@ const TeacherDashboard = ({ profile, session, currentClassId, setCurrentClassId 
             </h1>
 
             <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', background: 'var(--bg-secondary)', padding: '4px', borderRadius: '12px' }}>
-                {['home', 'class', 'student'].map((tab) => (
+                {['home', 'class'].map((tab) => (
                     <button
                         key={tab}
                         onClick={() => setCurrentTab(tab)}
@@ -56,7 +56,7 @@ const TeacherDashboard = ({ profile, session, currentClassId, setCurrentClassId 
                             fontWeight: 'bold', transition: 'all 0.2s'
                         }}
                     >
-                        {tab === 'home' ? '🏠 홈' : tab === 'class' ? '🏫 클래스' : '🎒 학생 관리'}
+                        {tab === 'home' ? '🏠 홈' : '🏫 클래스'}
                     </button>
                 ))}
             </div>
@@ -67,18 +67,6 @@ const TeacherDashboard = ({ profile, session, currentClassId, setCurrentClassId 
                 {currentTab === 'class' && (
                     <div style={{ marginBottom: '24px' }}>
                         <ClassManager userId={session.user.id} onClassFound={(id) => setCurrentClassId(id)} />
-                    </div>
-                )}
-
-                {currentTab === 'student' && (
-                    <div style={{ marginBottom: '24px' }}>
-                        {currentClassId ? (
-                            <StudentManager classId={currentClassId} />
-                        ) : (
-                            <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
-                                <p>먼저 '클래스' 메뉴에서 학급을 만들어주세요! 🏫</p>
-                            </div>
-                        )}
                     </div>
                 )}
             </Suspense>
