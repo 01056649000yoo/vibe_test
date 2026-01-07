@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import Button from '../common/Button';
+import { motion, AnimatePresence } from 'framer-motion';
 
 /**
- * 역할: 선생님 - 학급 내 학생 명단 관리 및 개별 코드 발급
+ * 역할: 선생님 - 학급 내 학생 명단 관리 및 개별 코드 발급, 포인트 지급 기능
  * props:
  *  - classId: 현재 학급 ID
  */
@@ -11,6 +12,7 @@ const StudentManager = ({ classId }) => {
     const [studentName, setStudentName] = useState('');
     const [students, setStudents] = useState([]);
     const [isAdding, setIsAdding] = useState(false);
+    const [updatingId, setUpdatingId] = useState(null);
 
     useEffect(() => {
         if (classId) fetchStudents();
@@ -48,7 +50,8 @@ const StudentManager = ({ classId }) => {
             .insert({
                 class_id: classId,
                 name: studentName,
-                student_code: code
+                student_code: code,
+                total_points: 0 // 초기 포인트 0 설정
             });
 
         if (error) {
@@ -58,6 +61,40 @@ const StudentManager = ({ classId }) => {
             fetchStudents();
         }
         setIsAdding(false);
+    };
+
+    // 포인트 지급 로직
+    const handleGivePoints = async (student, amount) => {
+        setUpdatingId(student.id);
+        const newTotal = (student.total_points || 0) + amount;
+
+        try {
+            // 1. 학생 포인트 업데이트
+            const { error: updateError } = await supabase
+                .from('students')
+                .update({ total_points: newTotal })
+                .eq('id', student.id);
+
+            if (updateError) throw updateError;
+
+            // 2. 포인트 로그 저장 (테이블이 없을 경우 대비하여 try-catch)
+            const { error: logError } = await supabase
+                .from('point_logs')
+                .insert({
+                    student_id: student.id,
+                    amount: amount,
+                    reason: '선생님 칭찬 포인트'
+                });
+
+            // 로그 저장은 실패해도 포인트 반영은 완료된 것으로 간주 (알림만 표시)
+            if (logError) console.warn('포인트 로그 저장 실패:', logError.message);
+
+            await fetchStudents();
+        } catch (error) {
+            alert('포인트 지급 중 오류가 발생했습니다: ' + error.message);
+        } finally {
+            setUpdatingId(null);
+        }
     };
 
     return (
@@ -100,6 +137,8 @@ const StudentManager = ({ classId }) => {
                             <th style={{ padding: '14px' }}>번호</th>
                             <th style={{ padding: '14px' }}>이름</th>
                             <th style={{ padding: '14px' }}>로그인 코드</th>
+                            <th style={{ padding: '14px' }}>현재 포인트</th>
+                            <th style={{ padding: '14px' }}>포인트 주기</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -117,16 +156,48 @@ const StudentManager = ({ classId }) => {
                                         fontWeight: '800',
                                         border: '1px dashed #FFE082',
                                         fontFamily: 'monospace',
-                                        fontSize: '1rem'
+                                        fontSize: '0.9rem'
                                     }}>
                                         {s.student_code}
                                     </span>
+                                </td>
+                                <td style={{ padding: '12px' }}>
+                                    <motion.span
+                                        key={s.total_points}
+                                        initial={{ scale: 1 }}
+                                        animate={{ scale: [1, 1.3, 1] }}
+                                        style={{ fontWeight: 'bold', color: 'var(--primary-color)', display: 'inline-block' }}
+                                    >
+                                        ✨ {s.total_points || 0}
+                                    </motion.span>
+                                </td>
+                                <td style={{ padding: '12px' }}>
+                                    <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
+                                        <Button
+                                            size="sm"
+                                            variant="secondary"
+                                            style={{ minWidth: '50px', padding: '4px 8px', fontSize: '0.8rem', background: '#FFF9C4', color: '#795548' }}
+                                            onClick={() => handleGivePoints(s, 10)}
+                                            disabled={updatingId === s.id}
+                                        >
+                                            +10
+                                        </Button>
+                                        <Button
+                                            size="sm"
+                                            variant="secondary"
+                                            style={{ minWidth: '50px', padding: '4px 8px', fontSize: '0.8rem', background: '#FFECB3', color: '#795548' }}
+                                            onClick={() => handleGivePoints(s, 50)}
+                                            disabled={updatingId === s.id}
+                                        >
+                                            +50
+                                        </Button>
+                                    </div>
                                 </td>
                             </tr>
                         ))}
                         {students.length === 0 && (
                             <tr>
-                                <td colSpan="3" style={{ padding: '40px', color: '#94a3b8', fontSize: '0.9rem' }}>
+                                <td colSpan="5" style={{ padding: '40px', color: '#94a3b8', fontSize: '0.9rem' }}>
                                     아직 등록된 학생이 없어요.<br />친구의 이름을 한 명씩 추가해주세요! 🎒
                                 </td>
                             </tr>
@@ -136,7 +207,7 @@ const StudentManager = ({ classId }) => {
             </div>
 
             <p style={{ marginTop: '12px', fontSize: '0.85rem', color: '#999', textAlign: 'center' }}>
-                💡 코드를 학생들에게 알려주면 바로 로그인할 수 있어요!
+                💡 칭찬 포인트로 학생들의 의욕을 북돋아주세요! 🌟
             </p>
         </div>
     );
