@@ -395,81 +395,88 @@ const StudentManager = ({ classId }) => {
                         <div style={{ padding: '0' }} className="print-view-wrapper">
                             <style>
                                 {`
-                                    @media print {
-                                        /* 1. 전체 숨김 후 인쇄 영역만 표시 */
-                                        body * { visibility: hidden !important; }
-                                        #print-area, #print-area * { visibility: visible !important; }
-                                        #print-area {
-                                            position: absolute !important;
-                                            left: 0 !important;
-                                            top: 0 !important;
-                                            width: 100% !important;
-                                            height: auto !important;
-                                            display: block !important;
-                                            visibility: visible !important;
-                                        }
-                                        .no-print { display: none !important; }
-
-                                        /* 2. 대시보드 UI 강제 제거 */
-                                        nav, header, footer, .sidebar, button:not(.print-only) {
-                                            display: none !important;
-                                        }
-
-                                        /* 3. 문서 구조 초기화 (여러 페이지 출력 보장) */
-                                        html, body {
-                                            margin: 0 !important;
-                                            padding: 0 !important;
-                                            height: auto !important;
-                                            overflow: visible !important;
-                                            background: white !important;
-                                        }
-
-                                        /* 4. A4 용지 규격 및 여백 */
-                                        @page {
-                                            size: A4;
-                                            margin: 1cm !important;
-                                        }
-
-                                        /* 5. 페이지 레이아웃 (반드시 블록 형태로 흐르게) */
-                                        .print-page {
-                                            display: block !important;
-                                            width: 100% !important;
-                                            height: auto !important;
-                                            min-height: 275mm !important;
-                                            page-break-after: always !important;
-                                            break-after: page !important;
-                                            padding: 0 !important;
-                                            margin: 0 !important;
-                                            border: none !important;
-                                            box-shadow: none !important;
-                                        }
-
-                                        /* 6. 학생 카드 그리드 및 잘림 방지 */
-                                        .print-grid {
-                                            display: grid !important;
-                                            grid-template-columns: repeat(2, 1fr) !important; /* 2열 종대 강제 */
-                                            gap: 15px !important;
-                                            width: 100% !important;
-                                        }
-
-                                        .student-print-card {
-                                            page-break-inside: avoid !important;
-                                            break-inside: avoid !important;
-                                            border: 2px solid #000 !important; /* 인쇄 시 선명하게 */
-                                        }
-
-                                        ::-webkit-scrollbar { display: none !important; }
+                                @media print {
+                                    /* 1. 인쇄 영역 외 모든 요소 숨김 및 초기화 */
+                                    html, body, #root, .App {
+                                        height: auto !important;
+                                        overflow: visible !important;
+                                        margin: 0 !important;
+                                        padding: 0 !important;
+                                        background: white !important;
+                                    }
+                                    
+                                    /* 모든 직접 자식 숨기기 */
+                                    body > *:not(#print-area) { 
+                                        display: none !important; 
                                     }
 
-                                    /* 화면(Web)에서 볼 때의 프리뷰 스타일 */
+                                    #print-area { 
+                                        display: block !important; 
+                                        position: static !important;
+                                        width: 100% !important;
+                                        visibility: visible !important;
+                                    }
+
+                                    .no-print { display: none !important; }
+
+                                    @page {
+                                        size: A4;
+                                        margin: 1cm !important;
+                                    }
+
+                                    /* 2. 페이지 단위 구성 */
                                     .print-page {
-                                        background: white;
-                                        width: 210mm;
-                                        margin: 20px auto;
-                                        padding: 20mm;
-                                        border: 1px solid #ddd;
-                                        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                                        display: block !important;
+                                        width: 100% !important;
+                                        height: auto !important;
+                                        min-height: 275mm !important;
+                                        page-break-after: always !important;
+                                        break-after: page !important;
+                                        margin: 0 !important;
+                                        padding: 0 !important;
+                                        border: none !important;
+                                        box-shadow: none !important;
                                     }
+
+                                    /* 3. 2열 종대 그리드 강제 */
+                                    .print-grid {
+                                        display: grid !important;
+                                        grid-template-columns: repeat(2, 1fr) !important;
+                                        gap: 15px !important;
+                                    }
+
+                                    .student-print-card {
+                                        page-break-inside: avoid !important;
+                                        break-inside: avoid !important;
+                                        border: 2px solid #000 !important;
+                                        border-radius: 12px !important;
+                                        padding: 20px !important;
+                                        min-height: 45mm !important;
+                                        display: flex !important;
+                                        flex-direction: column !important;
+                                        justify-content: center !important;
+                                        align-items: center !important;
+                                        background: white !important;
+                                    }
+
+                                    ::-webkit-scrollbar { display: none !important; }
+                                }
+
+                                /* 화면 확인용 프리뷰 */
+                                .print-page {
+                                    background: white;
+                                    width: 210mm;
+                                    margin: 30px auto;
+                                    padding: 20mm;
+                                    border: 1px solid #ddd;
+                                    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+                                    border-radius: 4px;
+                                }
+                                .print-grid {
+                                    display: grid;
+                                    grid-template-columns: repeat(2, 1fr);
+                                    gap: 20px;
+                                }
                                 `}
                             </style>
 
@@ -477,50 +484,33 @@ const StudentManager = ({ classId }) => {
                             {Array.from({ length: Math.ceil(students.length / 25) }).map((_, pageIdx) => (
                                 <div key={pageIdx} className="print-page">
                                     {/* 헤더 부분 */}
-                                    <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '2px solid #333', paddingBottom: '8px', marginBottom: '20px' }}>
-                                        <h3 style={{ margin: 0, fontSize: '1.3rem' }}>학급 접속 코드 ({pageIdx + 1}P)</h3>
-                                        <span style={{ fontSize: '0.9rem' }}>공유 코드 (전체 {students.length}명)</span>
+                                    <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '3px solid #000', paddingBottom: '10px', marginBottom: '25px' }}>
+                                        <h3 style={{ margin: 0, fontSize: '1.6rem', fontWeight: 'bold' }}>학급 접속 코드 명단</h3>
+                                        <span style={{ fontSize: '1.1rem', fontWeight: 'bold' }}>{pageIdx + 1} / {Math.ceil(students.length / 25)} Page</span>
                                     </div>
 
-                                    {/* 4열 그리드 영역 */}
-                                    <div style={{
-                                        display: 'grid',
-                                        gridTemplateColumns: 'repeat(4, 1fr)', // 4열로 조정
-                                        gap: '12px',
-                                        width: '100%',
-                                        flex: 1
-                                    }}>
+                                    {/* 2열 그리드 영역 */}
+                                    <div className="print-grid">
                                         {students.slice(pageIdx * 25, (pageIdx + 1) * 25).map((s, idx) => (
-                                            <div key={s.id} style={{
-                                                border: '1px solid #000',
-                                                borderRadius: '8px',
-                                                padding: '10px 6px',
-                                                display: 'flex',
-                                                flexDirection: 'column',
-                                                justifyContent: 'center',
-                                                alignItems: 'center',
-                                                background: '#fff',
-                                                height: '42mm', // 4열에 맞춘 높이 조절
-                                                boxSizing: 'border-box'
-                                            }}>
-                                                <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: '4px' }}>
-                                                    {pageIdx * 25 + idx + 1}
+                                            <div key={s.id} className="student-print-card">
+                                                <div style={{ fontSize: '1rem', color: '#555', marginBottom: '6px', fontWeight: 'bold' }}>
+                                                    {pageIdx * 25 + idx + 1}번
                                                 </div>
-                                                <div style={{ fontWeight: 'bold', fontSize: '1.2rem', marginBottom: '8px', color: '#000' }}>
+                                                <div style={{ fontWeight: '900', fontSize: '1.8rem', marginBottom: '12px', color: '#000' }}>
                                                     {s.name}
                                                 </div>
                                                 <div style={{
                                                     background: '#F8F9F9',
-                                                    width: '90%',
-                                                    padding: '6px 0',
+                                                    width: '100%',
+                                                    padding: '12px 0',
                                                     textAlign: 'center',
-                                                    borderRadius: '6px',
-                                                    fontSize: '1.3rem',
-                                                    fontWeight: 'bold',
+                                                    borderRadius: '10px',
+                                                    fontSize: '2.2rem',
+                                                    fontWeight: '900',
                                                     color: '#000',
                                                     fontFamily: 'monospace',
-                                                    border: '1px solid #D5DBDB',
-                                                    letterSpacing: '1px'
+                                                    border: '1px solid #eee',
+                                                    letterSpacing: '2px'
                                                 }}>
                                                     {s.student_code}
                                                 </div>
@@ -529,8 +519,8 @@ const StudentManager = ({ classId }) => {
                                     </div>
 
                                     {/* 푸터 */}
-                                    <div style={{ marginTop: 'auto', textAlign: 'center', fontSize: '0.8rem', color: '#999', borderTop: '1px solid #eee', paddingTop: '10px' }}>
-                                        안전한 학급 관리를 위한 접속 코드입니다. ✨
+                                    <div style={{ marginTop: '30px', textAlign: 'center', fontSize: '1rem', color: '#333', borderTop: '2px solid #eee', paddingTop: '15px' }}>
+                                        모두가 행복한 우리 반 - VIBE ✨
                                     </div>
                                 </div>
                             ))}
