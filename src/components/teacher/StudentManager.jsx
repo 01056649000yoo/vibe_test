@@ -374,7 +374,7 @@ const StudentManager = ({ classId }) => {
                     <div style={{
                         position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
                         background: 'white', zIndex: 2000, overflowY: 'auto'
-                    }} className="print-modal-container">
+                    }} className="print-modal-container" id="print-area">
                         {/* 닫기 및 인쇄 제어바 (화면에서만 보임) */}
                         <div className="no-print" style={{
                             position: 'sticky', top: 0, background: '#F8F9F9', padding: '12px 40px',
@@ -383,7 +383,7 @@ const StudentManager = ({ classId }) => {
                         }}>
                             <div>
                                 <h2 style={{ margin: 0, fontSize: '1.2rem', color: '#2C3E50' }}>🔑 학생 접속 코드 인쇄 명단</h2>
-                                <p style={{ margin: '4px 0 0 0', fontSize: '0.9rem', color: '#7F8C8D' }}>명단이 많으면 자동으로 다음 장으로 연결됩니다. ✨</p>
+                                <p style={{ margin: '4px 0 0 0', fontSize: '0.9rem', color: '#7F8C8D' }}>명단만 깔끔하게 인쇄됩니다. ✨</p>
                             </div>
                             <div style={{ display: 'flex', gap: '10px' }}>
                                 <Button onClick={() => window.print()} variant="primary">🖨️ 명단 인쇄하기</Button>
@@ -396,58 +396,72 @@ const StudentManager = ({ classId }) => {
                             <style>
                                 {`
                                     @media print {
-                                        /* 1. 기본 배경 및 스크롤 설정 해제 */
+                                        /* 1. 전체 숨김 후 인쇄 영역만 표시 */
+                                        body * { visibility: hidden !important; }
+                                        #print-area, #print-area * { visibility: visible !important; }
+                                        #print-area {
+                                            position: absolute !important;
+                                            left: 0 !important;
+                                            top: 0 !important;
+                                            width: 100% !important;
+                                            height: auto !important;
+                                            display: block !important;
+                                            visibility: visible !important;
+                                        }
                                         .no-print { display: none !important; }
+
+                                        /* 2. 대시보드 UI 강제 제거 */
+                                        nav, header, footer, .sidebar, button:not(.print-only) {
+                                            display: none !important;
+                                        }
+
+                                        /* 3. 문서 구조 초기화 (여러 페이지 출력 보장) */
                                         html, body {
                                             margin: 0 !important;
                                             padding: 0 !important;
                                             height: auto !important;
-                                            min-height: auto !important;
                                             overflow: visible !important;
                                             background: white !important;
                                         }
 
-                                        /* 2. 인쇄 모달 컨테이너 최적화 (Fixed -> Static 흐름) */
-                                        .print-modal-container {
-                                            position: static !important;
-                                            width: 100% !important;
-                                            max-width: 100% !important;
-                                            overflow: visible !important;
-                                            background: white !important;
-                                            display: block !important;
-                                        }
-
-                                        /* 3. A4 페이지 설정 및 여백 (1cm) */
+                                        /* 4. A4 용지 규격 및 여백 */
                                         @page {
                                             size: A4;
                                             margin: 1cm !important;
                                         }
 
-                                        /* 4. 개별 페이지 레이아웃 (25명 단위) */
+                                        /* 5. 페이지 레이아웃 (반드시 블록 형태로 흐르게) */
                                         .print-page {
-                                            display: flex !important;
-                                            flex-direction: column !important;
+                                            display: block !important;
                                             width: 100% !important;
-                                            height: 100% !important;
-                                            min-height: 270mm !important; /* 여백 제외 A4 높이 권장 */
+                                            height: auto !important;
+                                            min-height: 275mm !important;
                                             page-break-after: always !important;
                                             break-after: page !important;
                                             padding: 0 !important;
+                                            margin: 0 !important;
                                             border: none !important;
                                             box-shadow: none !important;
                                         }
 
-                                        /* 5. 학생 카드 잘림 방지 */
+                                        /* 6. 학생 카드 그리드 및 잘림 방지 */
+                                        .print-grid {
+                                            display: grid !important;
+                                            grid-template-columns: repeat(2, 1fr) !important; /* 2열 종대 강제 */
+                                            gap: 15px !important;
+                                            width: 100% !important;
+                                        }
+
                                         .student-print-card {
                                             page-break-inside: avoid !important;
                                             break-inside: avoid !important;
+                                            border: 2px solid #000 !important; /* 인쇄 시 선명하게 */
                                         }
 
-                                        /* 인쇄 시 스크롤바 숨김 */
                                         ::-webkit-scrollbar { display: none !important; }
                                     }
 
-                                    /* 화면 확인용 모드 (Shadow 효과) */
+                                    /* 화면(Web)에서 볼 때의 프리뷰 스타일 */
                                     .print-page {
                                         background: white;
                                         width: 210mm;
