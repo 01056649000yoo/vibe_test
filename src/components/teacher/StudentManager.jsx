@@ -364,6 +364,7 @@ const StudentManager = ({ classId }) => {
                             <div style={{ display: 'flex', gap: '10px' }}>
                                 <Button variant="ghost" style={{ flex: 1 }} onClick={() => setIsPointModalOpen(false)}>취소</Button>
                                 <Button onClick={handleBulkProcessPoints} style={{ flex: 1.5, background: pointFormData.type === 'give' ? '#3498DB' : '#E74C3C', color: 'white' }}>반영하기</Button>
+                            </div>
                         </Card>
                     </div>
                 )}
