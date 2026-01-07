@@ -369,7 +369,7 @@ const StudentManager = ({ classId }) => {
                     </div>
                 )}
 
-                {/* 접속 코드 (인쇄용 - 25명씩 콤팩트 레이아웃 적용) */}
+                {/* 접속 코드 (인쇄용 - 25명씩 4열 레이아웃 적용) */}
                 {isCodeModalOpen && (
                     <div style={{
                         position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
@@ -382,8 +382,8 @@ const StudentManager = ({ classId }) => {
                             borderBottom: '1px solid #eee', zIndex: 2100
                         }}>
                             <div>
-                                <h2 style={{ margin: 0, fontSize: '1.1rem', color: '#2C3E50' }}>🔑 학생 접속 코드 명단 (25인용)</h2>
-                                <p style={{ margin: '2px 0 0 0', fontSize: '0.8rem', color: '#7F8C8D' }}>한 페이지에 25명씩 출력됩니다. (총 {Math.ceil(students.length / 25)}페이지)</p>
+                                <h2 style={{ margin: 0, fontSize: '1.1rem', color: '#2C3E50' }}>🔑 학생 접속 코드 명단 (25인용/4열)</h2>
+                                <p style={{ margin: '2px 0 0 0', fontSize: '0.8rem', color: '#7F8C8D' }}>한 페이지에 25명씩 4열로 출력됩니다.</p>
                             </div>
                             <div style={{ display: 'flex', gap: '8px' }}>
                                 <Button onClick={() => window.print()} variant="primary" size="sm">🖨️ 인쇄하기</Button>
@@ -411,21 +411,24 @@ const StudentManager = ({ classId }) => {
                                             overflow: visible !important;
                                         }
                                         .print-page {
-                                            display: block !important;
+                                            display: flex !important;
+                                            flex-direction: column !important;
                                             page-break-after: always !important;
                                             break-after: page !important;
                                             width: 210mm !important;
                                             height: 296mm !important;
-                                            padding: 10mm !important;
+                                            padding: 20mm !important; /* 사방 여백 확대 (잘림 방지) */
                                             margin: 0 auto !important;
                                             box-sizing: border-box !important;
+                                            background: white !important;
                                         }
                                         @page { size: A4; margin: 0; }
                                     }
                                     .print-page {
                                         background: white;
-                                        margin-bottom: 20px;
+                                        margin: 0 auto 30px auto;
                                         border: 1px solid #eee;
+                                        max-width: 210mm;
                                     }
                                 `}
                             </style>
@@ -433,49 +436,51 @@ const StudentManager = ({ classId }) => {
                             {/* 25명씩 청크로 나누어 출력 */}
                             {Array.from({ length: Math.ceil(students.length / 25) }).map((_, pageIdx) => (
                                 <div key={pageIdx} className="print-page">
-                                    {/* 헤더 부분 (콤팩트) */}
-                                    <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '2px solid #333', paddingBottom: '5px', marginBottom: '15px' }}>
-                                        <h3 style={{ margin: 0, fontSize: '1.2rem' }}>학급 접속 코드 ({pageIdx + 1}P)</h3>
-                                        <span style={{ fontSize: '0.85rem' }}>전체 {students.length}명</span>
+                                    {/* 헤더 부분 */}
+                                    <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '2px solid #333', paddingBottom: '8px', marginBottom: '20px' }}>
+                                        <h3 style={{ margin: 0, fontSize: '1.3rem' }}>학급 접속 코드 ({pageIdx + 1}P)</h3>
+                                        <span style={{ fontSize: '0.9rem' }}>공유 코드 (전체 {students.length}명)</span>
                                     </div>
 
-                                    {/* 25인 그리드 영역 (5x5 권장) */}
+                                    {/* 4열 그리드 영역 */}
                                     <div style={{
                                         display: 'grid',
-                                        gridTemplateColumns: 'repeat(5, 1fr)',
-                                        gap: '8px',
-                                        width: '100%'
+                                        gridTemplateColumns: 'repeat(4, 1fr)', // 4열로 조정
+                                        gap: '12px',
+                                        width: '100%',
+                                        flex: 1
                                     }}>
                                         {students.slice(pageIdx * 25, (pageIdx + 1) * 25).map((s, idx) => (
                                             <div key={s.id} style={{
                                                 border: '1px solid #000',
                                                 borderRadius: '8px',
-                                                padding: '8px 4px',
+                                                padding: '10px 6px',
                                                 display: 'flex',
                                                 flexDirection: 'column',
                                                 justifyContent: 'center',
                                                 alignItems: 'center',
                                                 background: '#fff',
-                                                minHeight: '48mm',
+                                                height: '42mm', // 4열에 맞춘 높이 조절
                                                 boxSizing: 'border-box'
                                             }}>
-                                                <div style={{ fontSize: '0.75rem', color: '#666', marginBottom: '2px' }}>
+                                                <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: '4px' }}>
                                                     {pageIdx * 25 + idx + 1}
                                                 </div>
-                                                <div style={{ fontWeight: 'bold', fontSize: '1.1rem', marginBottom: '6px', color: '#000' }}>
+                                                <div style={{ fontWeight: 'bold', fontSize: '1.2rem', marginBottom: '8px', color: '#000' }}>
                                                     {s.name}
                                                 </div>
                                                 <div style={{
                                                     background: '#F8F9F9',
-                                                    width: '94%',
+                                                    width: '90%',
                                                     padding: '6px 0',
                                                     textAlign: 'center',
                                                     borderRadius: '6px',
-                                                    fontSize: '1.2rem',
+                                                    fontSize: '1.3rem',
                                                     fontWeight: 'bold',
                                                     color: '#000',
                                                     fontFamily: 'monospace',
-                                                    border: '1px solid #D5DBDB'
+                                                    border: '1px solid #D5DBDB',
+                                                    letterSpacing: '1px'
                                                 }}>
                                                     {s.student_code}
                                                 </div>
@@ -483,9 +488,9 @@ const StudentManager = ({ classId }) => {
                                         ))}
                                     </div>
 
-                                    {/* 푸터 (콤팩트) */}
-                                    <div style={{ marginTop: '10px', textAlign: 'center', fontSize: '0.75rem', color: '#999', borderTop: '1px solid #eee', paddingTop: '5px' }}>
-                                        Powered by VIBE ✨
+                                    {/* 푸터 */}
+                                    <div style={{ marginTop: 'auto', textAlign: 'center', fontSize: '0.8rem', color: '#999', borderTop: '1px solid #eee', paddingTop: '10px' }}>
+                                        안전한 학급 관리를 위한 접속 코드입니다. ✨
                                     </div>
                                 </div>
                             ))}
