@@ -7,6 +7,7 @@ import { supabase } from '../../lib/supabaseClient';
 // 지연 로딩 적용
 const ClassManager = lazy(() => import('./ClassManager'));
 const StudentManager = lazy(() => import('./StudentManager'));
+const MissionManager = lazy(() => import('./MissionManager'));
 
 /**
  * 역할: 선생님 메인 대시보드 (탭 네비게이션 포함)
@@ -17,7 +18,7 @@ const StudentManager = lazy(() => import('./StudentManager'));
  *  - setCurrentClassId: 학급 ID 변경 함수
  */
 const TeacherDashboard = ({ profile, session, currentClassId, setCurrentClassId }) => {
-    const [currentTab, setCurrentTab] = useState('home'); // 'home', 'class', 'student'
+    const [currentTab, setCurrentTab] = useState('home'); // 'home', 'class', 'mission'
 
     return (
         <Card style={{ maxWidth: '600px' }}>
@@ -45,18 +46,22 @@ const TeacherDashboard = ({ profile, session, currentClassId, setCurrentClassId 
             </h1>
 
             <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', background: 'var(--bg-secondary)', padding: '4px', borderRadius: '12px' }}>
-                {['home', 'class'].map((tab) => (
+                {[
+                    { id: 'home', label: '🏠 홈' },
+                    { id: 'class', label: '🏫 클래스' },
+                    { id: 'mission', label: '✍️ 글감 관리' }
+                ].map((tab) => (
                     <button
-                        key={tab}
-                        onClick={() => setCurrentTab(tab)}
+                        key={tab.id}
+                        onClick={() => setCurrentTab(tab.id)}
                         style={{
                             flex: 1, padding: '10px', borderRadius: '8px', border: 'none', cursor: 'pointer',
-                            background: currentTab === tab ? 'white' : 'transparent',
-                            color: currentTab === tab ? 'var(--primary-color)' : 'var(--text-secondary)',
+                            background: currentTab === tab.id ? 'white' : 'transparent',
+                            color: currentTab === tab.id ? 'var(--primary-color)' : 'var(--text-secondary)',
                             fontWeight: 'bold', transition: 'all 0.2s'
                         }}
                     >
-                        {tab === 'home' ? '🏠 홈' : '🏫 클래스'}
+                        {tab.label}
                     </button>
                 ))}
             </div>
@@ -68,6 +73,9 @@ const TeacherDashboard = ({ profile, session, currentClassId, setCurrentClassId 
                     <div style={{ marginBottom: '24px' }}>
                         <ClassManager userId={session.user.id} onClassFound={(id) => setCurrentClassId(id)} />
                     </div>
+                )}
+                {currentTab === 'mission' && (
+                    <MissionManager classId={currentClassId} />
                 )}
             </Suspense>
         </Card>
