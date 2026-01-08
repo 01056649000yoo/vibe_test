@@ -21,7 +21,7 @@ const TeacherDashboard = ({ profile, session, currentClassId, setCurrentClassId 
     const [currentTab, setCurrentTab] = useState('home'); // 'home', 'class', 'mission'
 
     return (
-        <Card style={{ maxWidth: '600px' }}>
+        <Card style={{ maxWidth: '1000px', width: '95%' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
                 <div style={{
                     background: 'var(--bg-secondary)',

@@ -19,9 +19,9 @@ const MissionManager = ({ classId }) => {
         genre: '수필',
         min_chars: 100,
         min_paragraphs: 2,
-        base_reward: 50,
-        bonus_threshold: 300,
-        bonus_reward: 30
+        base_reward: 100,
+        bonus_threshold: 100,
+        bonus_reward: 10
     });
 
     const genres = ['시', '수필', '일기', '논설문', '설명문'];
@@ -82,9 +82,9 @@ const MissionManager = ({ classId }) => {
                 genre: '수필',
                 min_chars: 100,
                 min_paragraphs: 2,
-                base_reward: 50,
-                bonus_threshold: 300,
-                bonus_reward: 30
+                base_reward: 100,
+                bonus_threshold: 100,
+                bonus_reward: 10
             });
             fetchMissions();
         } catch (error) {
@@ -121,7 +121,7 @@ const MissionManager = ({ classId }) => {
                     >
                         <Card style={{
                             maxWidth: '100%',
-                            padding: '32px',
+                            padding: '24px', // 가로 공간 확보를 위해 패딩 축소
                             marginBottom: '40px',
                             border: 'none',
                             background: '#FFFFFF',
@@ -208,6 +208,8 @@ const MissionManager = ({ classId }) => {
                                                 <input
                                                     type="number"
                                                     value={formData.min_chars}
+                                                    step="100"
+                                                    min="0"
                                                     onChange={e => setFormData({ ...formData, min_chars: parseInt(e.target.value) || 0 })}
                                                     style={{
                                                         width: '100%', padding: '14px', borderRadius: '12px', border: '2px solid #DCEDC8',
@@ -223,6 +225,7 @@ const MissionManager = ({ classId }) => {
                                                 <input
                                                     type="number"
                                                     value={formData.min_paragraphs}
+                                                    min="1"
                                                     onChange={e => setFormData({ ...formData, min_paragraphs: parseInt(e.target.value) || 0 })}
                                                     style={{
                                                         width: '100%', padding: '14px', borderRadius: '12px', border: '2px solid #DCEDC8',
@@ -251,6 +254,8 @@ const MissionManager = ({ classId }) => {
                                                 <input
                                                     type="number"
                                                     value={formData.base_reward}
+                                                    step="100"
+                                                    min="0"
                                                     onChange={e => setFormData({ ...formData, base_reward: parseInt(e.target.value) || 0 })}
                                                     style={{
                                                         width: '120px', padding: '12px', borderRadius: '12px', border: '2px solid #FFE082',
@@ -278,6 +283,8 @@ const MissionManager = ({ classId }) => {
                                                 <input
                                                     type="number"
                                                     value={formData.bonus_threshold}
+                                                    step="100"
+                                                    min="0"
                                                     onChange={e => setFormData({ ...formData, bonus_threshold: parseInt(e.target.value) || 0 })}
                                                     style={{
                                                         width: '100px', padding: '10px', borderRadius: '10px', border: '2px solid #FFD54F',
@@ -290,6 +297,8 @@ const MissionManager = ({ classId }) => {
                                                 <input
                                                     type="number"
                                                     value={formData.bonus_reward}
+                                                    step="10"
+                                                    min="0"
                                                     onChange={e => setFormData({ ...formData, bonus_reward: parseInt(e.target.value) || 0 })}
                                                     style={{
                                                         width: '100px', padding: '10px', borderRadius: '10px', border: '2px solid #FFD54F',
