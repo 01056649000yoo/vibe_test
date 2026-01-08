@@ -93,162 +93,221 @@ const MissionManager = ({ classId }) => {
     };
 
     return (
-        <div style={{ marginTop: '4px', textAlign: 'left' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#2C3E50', fontWeight: '900' }}>✍️ 글쓰기 미션 관리</h3>
+        <div style={{ marginTop: '4px', textAlign: 'left', width: '100%', boxSizing: 'border-box' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                <h3 style={{ margin: 0, fontSize: '1.5rem', color: '#2C3E50', fontWeight: '900' }}>✍️ 글쓰기 미션 관리</h3>
                 <Button
                     onClick={() => setIsFormOpen(!isFormOpen)}
                     style={{
-                        background: isFormOpen ? '#95A5A6' : 'var(--primary-color)',
+                        background: isFormOpen ? '#FF5252' : 'var(--primary-color)',
                         color: 'white',
-                        padding: '8px 16px',
-                        fontSize: '0.9rem'
+                        padding: '10px 20px',
+                        fontSize: '0.95rem',
+                        fontWeight: 'bold',
+                        boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
                     }}
                 >
-                    {isFormOpen ? '닫기' : '+ 새 미션 등록'}
+                    {isFormOpen ? '✖ 닫기' : '➕ 새 미션 등록'}
                 </Button>
             </div>
 
             <AnimatePresence>
                 {isFormOpen && (
                     <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
+                        initial={{ height: 0, opacity: 0, scale: 0.95 }}
+                        animate={{ height: 'auto', opacity: 1, scale: 1 }}
+                        exit={{ height: 0, opacity: 0, scale: 0.95 }}
                         style={{ overflow: 'hidden' }}
                     >
                         <Card style={{
                             maxWidth: '100%',
-                            padding: '24px',
-                            marginBottom: '24px',
-                            border: '2px solid #E0F7FA',
-                            boxShadow: '0 10px 25px rgba(0,0,0,0.05)'
+                            padding: '32px',
+                            marginBottom: '40px',
+                            border: 'none',
+                            background: '#FFFFFF',
+                            boxShadow: '0 15px 40px rgba(0,0,0,0.12)',
+                            borderRadius: '32px'
                         }}>
-                            <form onSubmit={handleCreateMission} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                            <form onSubmit={handleCreateMission} style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+
+                                <div style={{ textAlign: 'center', marginBottom: '8px' }}>
+                                    <h2 style={{ margin: 0, color: 'var(--primary-color)', fontSize: '1.8rem' }}>새로운 글쓰기 여행 🌏</h2>
+                                    <p style={{ color: '#90A4AE', margin: '8px 0 0 0' }}>선생님의 따뜻한 가이드로 아이들의 생각을 깨워주세요.</p>
+                                </div>
 
                                 {/* 1. 주제 정보 섹션 */}
-                                <section>
-                                    <h4 style={{ margin: '0 0 16px 0', color: '#1A237E', borderLeft: '4px solid #3F51B5', paddingLeft: '8px', fontSize: '1rem' }}>📌 주제 및 종류</h4>
+                                <section style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                    <div style={{
+                                        display: 'flex', alignItems: 'center', gap: '8px',
+                                        background: '#E1F5FE', padding: '8px 16px', borderRadius: '12px', width: 'fit-content'
+                                    }}>
+                                        <span style={{ fontSize: '1.2rem' }}>📌</span>
+                                        <h4 style={{ margin: 0, color: '#0277BD', fontWeight: '900' }}>주제 및 종류</h4>
+                                    </div>
+
                                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
-                                        <div style={{ flex: 1, minWidth: '200px' }}>
-                                            <label style={{ display: 'block', fontSize: '0.85rem', color: '#546E7A', marginBottom: '8px', fontWeight: 'bold' }}>주제</label>
+                                        <div style={{ flex: 1, minWidth: '250px' }}>
+                                            <label style={{ display: 'block', fontSize: '0.9rem', color: '#455A64', marginBottom: '8px', fontWeight: 'bold' }}>미션 주제</label>
                                             <input
                                                 type="text"
                                                 value={formData.title}
                                                 onChange={e => setFormData({ ...formData, title: e.target.value })}
-                                                placeholder="학생들에게 보여줄 글쓰기 주제"
-                                                style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #CFD8DC', outlineColor: 'var(--primary-color)' }}
+                                                placeholder="학생들에게 보여줄 흥미로운 주제 (예: 내가 만약 초능력자가 된다면?)"
+                                                style={{
+                                                    width: '100%', padding: '16px', borderRadius: '14px', border: '2px solid #ECEFF1',
+                                                    background: '#FFFFFF', color: '#263238', fontSize: '1rem',
+                                                    boxSizing: 'border-box', outlineColor: 'var(--primary-color)'
+                                                }}
                                             />
                                         </div>
-                                        <div style={{ width: '150px' }}>
-                                            <label style={{ display: 'block', fontSize: '0.85rem', color: '#546E7A', marginBottom: '8px', fontWeight: 'bold' }}>글 종류</label>
+                                        <div style={{ width: '160px' }}>
+                                            <label style={{ display: 'block', fontSize: '0.9rem', color: '#455A64', marginBottom: '8px', fontWeight: 'bold' }}>글 종류</label>
                                             <select
                                                 value={formData.genre}
                                                 onChange={e => setFormData({ ...formData, genre: e.target.value })}
-                                                style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #CFD8DC', background: 'white' }}
+                                                style={{
+                                                    width: '100%', padding: '16px', borderRadius: '14px', border: '2px solid #ECEFF1',
+                                                    background: '#FFFFFF', color: '#263238', fontSize: '1rem',
+                                                    boxSizing: 'border-box', cursor: 'pointer'
+                                                }}
                                             >
                                                 {genres.map(g => <option key={g} value={g}>{g}</option>)}
                                             </select>
                                         </div>
                                     </div>
-                                    <div style={{ marginTop: '16px' }}>
-                                        <label style={{ display: 'block', fontSize: '0.85rem', color: '#546E7A', marginBottom: '8px', fontWeight: 'bold' }}>글쓰기 안내 (학생들에게 전하는 도움말)</label>
+
+                                    <div>
+                                        <label style={{ display: 'block', fontSize: '0.9rem', color: '#455A64', marginBottom: '8px', fontWeight: 'bold' }}>글쓰기 가이드 (상세 안내)</label>
                                         <textarea
                                             value={formData.guide}
                                             onChange={e => setFormData({ ...formData, guide: e.target.value })}
-                                            placeholder="학생들이 글을 쓸 때 참고할 수 있는 구체적인 가이드를 입력해주세요."
+                                            placeholder="아이들이 어떻게 글을 쓰면 좋을지 다정하게 설명해주세요.&#10;나의 경험을 넣으면 더 좋아요!"
                                             style={{
-                                                width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #CFD8DC',
-                                                minHeight: '100px', resize: 'vertical', lineHeight: '1.6', outlineColor: 'var(--primary-color)'
+                                                width: '100%', padding: '16px', borderRadius: '14px', border: '2px solid #ECEFF1',
+                                                background: '#FFFFFF', color: '#263238', fontSize: '1rem',
+                                                minHeight: '140px', resize: 'vertical', lineHeight: '1.6', boxSizing: 'border-box',
+                                                outlineColor: 'var(--primary-color)'
                                             }}
                                         />
                                     </div>
                                 </section>
 
                                 {/* 2. 제한 조건 섹션 */}
-                                <section style={{ background: '#F1F8E9', padding: '20px', borderRadius: '16px' }}>
-                                    <h4 style={{ margin: '0 0 16px 0', color: '#2E7D32', borderLeft: '4px solid #4CAF50', paddingLeft: '8px', fontSize: '1rem' }}>📏 분량 제한 (필수 조건)</h4>
-                                    <div style={{ display: 'flex', gap: '16px' }}>
-                                        <div style={{ flex: 1 }}>
-                                            <label style={{ display: 'block', fontSize: '0.85rem', color: '#546E7A', marginBottom: '8px' }}>최소 글자 수</label>
+                                <section style={{ background: '#F9FBE7', padding: '24px', borderRadius: '24px', border: '1px solid #F0F4C3' }}>
+                                    <div style={{
+                                        display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px'
+                                    }}>
+                                        <span style={{ fontSize: '1.2rem' }}>📏</span>
+                                        <h4 style={{ margin: 0, color: '#33691E', fontWeight: '900' }}>분량 제한 (필수 조건)</h4>
+                                    </div>
+
+                                    <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+                                        <div style={{ flex: 1, minWidth: '140px' }}>
+                                            <label style={{ display: 'block', fontSize: '0.85rem', color: '#558B2F', marginBottom: '8px', fontWeight: 'bold' }}>최소 글자 수</label>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                                 <input
                                                     type="number"
                                                     value={formData.min_chars}
                                                     onChange={e => setFormData({ ...formData, min_chars: parseInt(e.target.value) || 0 })}
-                                                    style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #C8E6C9', textAlign: 'right' }}
+                                                    style={{
+                                                        width: '100%', padding: '14px', borderRadius: '12px', border: '2px solid #DCEDC8',
+                                                        background: '#FFFFFF', color: '#33691E', textAlign: 'right', fontWeight: 'bold', fontSize: '1rem'
+                                                    }}
                                                 />
-                                                <span style={{ fontSize: '0.9rem', color: '#2E7D32', fontWeight: 'bold' }}>자</span>
+                                                <span style={{ fontSize: '1rem', color: '#33691E', fontWeight: 'bold' }}>자</span>
                                             </div>
                                         </div>
-                                        <div style={{ flex: 1 }}>
-                                            <label style={{ display: 'block', fontSize: '0.85rem', color: '#546E7A', marginBottom: '8px' }}>최소 문단 수</label>
+                                        <div style={{ flex: 1, minWidth: '140px' }}>
+                                            <label style={{ display: 'block', fontSize: '0.85rem', color: '#558B2F', marginBottom: '8px', fontWeight: 'bold' }}>최소 문단 수</label>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                                 <input
                                                     type="number"
                                                     value={formData.min_paragraphs}
                                                     onChange={e => setFormData({ ...formData, min_paragraphs: parseInt(e.target.value) || 0 })}
-                                                    style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #C8E6C9', textAlign: 'right' }}
+                                                    style={{
+                                                        width: '100%', padding: '14px', borderRadius: '12px', border: '2px solid #DCEDC8',
+                                                        background: '#FFFFFF', color: '#33691E', textAlign: 'right', fontWeight: 'bold', fontSize: '1rem'
+                                                    }}
                                                 />
-                                                <span style={{ fontSize: '0.9rem', color: '#2E7D32', fontWeight: 'bold' }}>개</span>
+                                                <span style={{ fontSize: '1rem', color: '#33691E', fontWeight: 'bold' }}>개</span>
                                             </div>
                                         </div>
                                     </div>
                                 </section>
 
                                 {/* 3. 포인트 보상 섹션 */}
-                                <section style={{ background: '#FFFDE7', padding: '20px', borderRadius: '16px', border: '1px solid #FFF59D' }}>
-                                    <h4 style={{ margin: '0 0 16px 0', color: '#F57C00', borderLeft: '4px solid #FF9800', paddingLeft: '8px', fontSize: '1rem' }}>💎 포인트 보상 설정</h4>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                            <label style={{ fontSize: '0.9rem', color: '#546E7A', minWidth: '110px' }}>기본 제출 포인트</label>
+                                <section style={{ background: '#FFFDE7', padding: '24px', borderRadius: '24px', border: '1px solid #FFF59D' }}>
+                                    <div style={{
+                                        display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px'
+                                    }}>
+                                        <span style={{ fontSize: '1.2rem' }}>💎</span>
+                                        <h4 style={{ margin: 0, color: '#F57F17', fontWeight: '900' }}>포인트 보상 설정</h4>
+                                    </div>
+
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                                            <label style={{ fontSize: '0.95rem', color: '#795548', minWidth: '120px', fontWeight: 'bold' }}>기본 제출 포인트</label>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                                 <input
                                                     type="number"
                                                     value={formData.base_reward}
                                                     onChange={e => setFormData({ ...formData, base_reward: parseInt(e.target.value) || 0 })}
-                                                    style={{ width: '100px', padding: '10px', borderRadius: '10px', border: '1px solid #FFE082', textAlign: 'right' }}
+                                                    style={{
+                                                        width: '120px', padding: '12px', borderRadius: '12px', border: '2px solid #FFE082',
+                                                        background: '#FFFFFF', color: '#F57F17', textAlign: 'right', fontWeight: 'bold', fontSize: '1rem'
+                                                    }}
                                                 />
-                                                <span style={{ fontSize: '0.9rem', color: '#F57C00', fontWeight: 'bold' }}>P 지급</span>
+                                                <span style={{ fontSize: '1rem', color: '#F57F17', fontWeight: 'bold' }}>P 지급</span>
                                             </div>
                                         </div>
 
                                         <div style={{
-                                            background: 'white',
-                                            padding: '16px',
-                                            borderRadius: '12px',
+                                            background: '#FFFFFF',
+                                            padding: '20px',
+                                            borderRadius: '16px',
                                             border: '2px dashed #FFD54F',
                                             display: 'flex',
                                             alignItems: 'center',
                                             flexWrap: 'wrap',
-                                            gap: '10px'
+                                            gap: '12px',
+                                            boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'
                                         }}>
-                                            <span style={{ fontWeight: 'bold', color: '#E65100', fontSize: '0.95rem' }}>🔥 동기부여 보너스</span>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                <span>글자수가</span>
+                                            <span style={{ fontWeight: '900', color: '#E65100', fontSize: '1rem' }}>🔥 동기부여 보너스</span>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <span style={{ fontSize: '0.95rem', color: '#795548' }}>글자수가</span>
                                                 <input
                                                     type="number"
                                                     value={formData.bonus_threshold}
                                                     onChange={e => setFormData({ ...formData, bonus_threshold: parseInt(e.target.value) || 0 })}
-                                                    style={{ width: '80px', padding: '8px', borderRadius: '8px', border: '1px solid #FFD54F', textAlign: 'center', fontWeight: 'bold' }}
+                                                    style={{
+                                                        width: '100px', padding: '10px', borderRadius: '10px', border: '2px solid #FFD54F',
+                                                        textAlign: 'center', fontWeight: '900', fontSize: '1rem', background: '#FFFFFF'
+                                                    }}
                                                 />
-                                                <span>자 이상일 때,</span>
+                                                <span style={{ fontSize: '0.95rem', color: '#795548' }}>자 이상일 때,</span>
                                             </div>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                                 <input
                                                     type="number"
                                                     value={formData.bonus_reward}
                                                     onChange={e => setFormData({ ...formData, bonus_reward: parseInt(e.target.value) || 0 })}
-                                                    style={{ width: '80px', padding: '8px', borderRadius: '8px', border: '1px solid #FFD54F', textAlign: 'center', fontWeight: 'bold', color: '#D84315' }}
+                                                    style={{
+                                                        width: '100px', padding: '10px', borderRadius: '10px', border: '2px solid #FFD54F',
+                                                        textAlign: 'center', fontWeight: '900', fontSize: '1.1rem', color: '#D84315', background: '#FFFFFF'
+                                                    }}
                                                 />
-                                                <span style={{ color: '#D84315', fontWeight: 'bold' }}>포인트 추가 지급!</span>
+                                                <span style={{ color: '#D84315', fontWeight: '900', fontSize: '1rem' }}>포인트 추가 지급!</span>
                                             </div>
                                         </div>
                                     </div>
                                 </section>
 
-                                <Button type="submit" style={{ height: '56px', fontSize: '1.2rem', fontWeight: 'bold', marginTop: '8px' }}>
-                                    ✨ 미션 등록하기
+                                <Button type="submit" style={{
+                                    height: '64px', fontSize: '1.3rem', fontWeight: '900', marginTop: '8px',
+                                    background: 'var(--primary-color)', color: 'white', border: 'none',
+                                    boxShadow: '0 10px 20px rgba(135, 206, 235, 0.3)'
+                                }}>
+                                    ✨ 멋진 미션 공개하기
                                 </Button>
                             </form>
                         </Card>

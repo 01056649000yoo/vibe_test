@@ -1,11 +1,12 @@
 :root {
-  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Noto Sans KR', 'Inter', system-ui, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #0f172a;
+  color-scheme: light;
+  /* 다크모드 강제 해제 */
+  color: #333333;
+  background-color: #F8F8F8;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
