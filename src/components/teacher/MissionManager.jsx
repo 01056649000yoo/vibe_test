@@ -117,16 +117,18 @@ const MissionManager = ({ classId }) => {
                         initial={{ height: 0, opacity: 0, scale: 0.95 }}
                         animate={{ height: 'auto', opacity: 1, scale: 1 }}
                         exit={{ height: 0, opacity: 0, scale: 0.95 }}
-                        style={{ overflow: 'hidden' }}
+                        style={{ overflow: 'hidden', width: '100%' }}
                     >
                         <Card style={{
                             maxWidth: '100%',
+                            width: '100%',
                             padding: '24px', // 가로 공간 확보를 위해 패딩 축소
                             marginBottom: '40px',
                             border: 'none',
                             background: '#FFFFFF',
                             boxShadow: '0 15px 40px rgba(0,0,0,0.12)',
-                            borderRadius: '32px'
+                            borderRadius: '32px',
+                            boxSizing: 'border-box'
                         }}>
                             <form onSubmit={handleCreateMission} style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
 
@@ -291,7 +293,7 @@ const MissionManager = ({ classId }) => {
                                                         textAlign: 'center', fontWeight: '900', fontSize: '1rem', background: '#FFFFFF'
                                                     }}
                                                 />
-                                                <span style={{ fontSize: '0.95rem', color: '#795548' }}>자 이상일 때,</span>
+                                                <span style={{ fontSize: '0.95rem', color: '#795548' }}>자 초과일 때,</span>
                                             </div>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                                 <input
